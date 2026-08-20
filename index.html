@@ -8,12 +8,14 @@
     <!-- Leaflet & FontAwesome -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css" />
 
     <style>
         :root {
             --primary: #10b981;
             --accent: #38bdf8;
             --danger: #ef4444;
+            --warning: #f59e0b;
             --bg-glass: rgba(15, 23, 42, 0.92);
             --border: rgba(255, 255, 255, 0.12);
         }
@@ -279,6 +281,84 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.5);
         }
 
+        /* لوحة الإدارة */
+        .admin-panel {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 300px;
+            background: var(--bg-glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 22px;
+            padding: 16px;
+            z-index: 2000;
+            display: none;
+            flex-direction: column;
+            gap: 12px;
+            box-shadow: 0 10px 35px rgba(0,0,0,0.6);
+        }
+
+        .admin-panel h2 {
+            font-size: 1.2rem;
+            margin-bottom: 5px;
+            color: var(--accent);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .admin-btn {
+            background: #1e293b;
+            color: #fff;
+            border: 1px solid var(--border);
+            padding: 10px;
+            border-radius: 12px;
+            cursor: pointer;
+            text-align: right;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .admin-btn:hover {
+            background: #334155;
+        }
+
+        .admin-btn i {
+            width: 20px;
+            color: var(--accent);
+        }
+
+        .admin-active {
+            border-color: var(--primary) !important;
+            background: rgba(16, 185, 129, 0.1) !important;
+        }
+
+        .save-admin {
+            background: var(--primary) !important;
+            margin-top: 10px;
+        }
+
+        #admin-toggle-btn {
+            background: #334155;
+        }
+
+        .admin-badge {
+            position: absolute;
+            top: 5px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--danger);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            z-index: 1500;
+            display: none;
+        }
+
         .car-cursor {
             font-size: 2rem;
             color: #38bdf8;
@@ -315,14 +395,65 @@
             <input type="text" id="dest-text" placeholder="ابحث عن وجهة، حي، شارع..." onkeyup="searchPlaces(event)">
         </div>
         <div class="search-dropdown" id="search-results"></div>
+        
+        <div style="display: flex; gap: 8px; overflow-x: auto; padding-top: 5px; scrollbar-width: none;">
+            <button class="btn-my-loc" onclick="searchNearby('hospital')"><i class="fa-solid fa-hospital"></i> مستشفيات</button>
+            <button class="btn-my-loc" onclick="searchNearby('gas_station')"><i class="fa-solid fa-gas-pump"></i> محطات وقود</button>
+            <button class="btn-my-loc" onclick="searchNearby('restaurant')"><i class="fa-solid fa-utensils"></i> مطاعم</button>
+            <button class="btn-my-loc" onclick="searchNearby('parking')"><i class="fa-solid fa-square-p"></i> مواقف</button>
+        </div>
+    </div>
+
+    <!-- لوحة الإدارة -->
+    <div id="admin-badge" class="admin-badge">وضع تعديل الخريطة نشط</div>
+    <div class="admin-panel" id="admin-panel">
+        <h2>
+            لوحة الإدارة
+            <i class="fa-solid fa-xmark" style="cursor:pointer" onclick="toggleAdminPanel()"></i>
+        </h2>
+        <button class="admin-btn" id="btn-draw-road" onclick="startDrawing('polyline', 'road')">
+            <i class="fa-solid fa-road"></i> إضافة شارع جديد / تكملة طريق
+        </button>
+        <button class="admin-btn" id="btn-draw-bridge" onclick="startDrawing('marker', 'bridge')">
+            <i class="fa-solid fa-bridge-lock"></i> جسر مغلق / غير موجود
+        </button>
+        <button class="admin-btn" id="btn-draw-info" onclick="startDrawing('marker', 'info')">
+            <i class="fa-solid fa-circle-info"></i> إضافة معلومة / اسم شارع
+        </button>
+        
+        <hr style="border: 0; border-top: 1px solid var(--border); margin: 5px 0;">
+        
+        <button class="admin-btn save-admin" onclick="saveAdminData()">
+            <i class="fa-solid fa-floppy-disk"></i> حفظ التغييرات
+        </button>
+        <button class="admin-btn" style="background:var(--danger) !important" onclick="clearAdminData()">
+            <i class="fa-solid fa-trash"></i> مسح كافة التعديلات
+        </button>
+    </div>
+
+    <!-- قائمة البلاغات -->
+    <div class="admin-panel" id="report-panel" style="top: auto; bottom: 80px; left: 80px; right: auto; width: 220px;">
+        <h2 style="font-size: 1rem;">إبلاغ عن حالة طريق</h2>
+        <button class="admin-btn" onclick="addReport('traffic', 'ازدحام مروري')">
+            <i class="fa-solid fa-car-burst" style="color:var(--warning)"></i> ازدحام شديد
+        </button>
+        <button class="admin-btn" onclick="addReport('accident', 'حادث مروري')">
+            <i class="fa-solid fa-burst" style="color:var(--danger)"></i> حادث
+        </button>
+        <button class="admin-btn" onclick="addReport('closure', 'طريق مغلق')">
+            <i class="fa-solid fa-road-barrier" style="color:var(--danger)"></i> طريق مغلق
+        </button>
     </div>
 
     <!-- أزرار الخريطة -->
     <div class="floating-btns">
+        <button class="fab" id="admin-toggle-btn" onclick="toggleAdminPanel()" title="لوحة الإدارة"><i class="fa-solid fa-user-gear"></i></button>
+        <button class="fab" onclick="toggleReportMenu()" title="إبلاغ عن حالة طريق"><i class="fa-solid fa-triangle-exclamation"></i></button>
         <button class="fab" onclick="useCurrentLocation()"><i class="fa-solid fa-location-crosshairs"></i></button>
         <button class="fab" onclick="toggleVoice()"><i class="fa-solid fa-volume-high" id="voice-icon"></i></button>
         <button class="fab" onclick="toggleLayer()"><i class="fa-solid fa-layer-group"></i></button>
         <button class="fab" onclick="resetAll()"><i class="fa-solid fa-rotate-right"></i></button>
+        <button class="fab" onclick="shareLocation()" title="مشاركة الموقع"><i class="fa-solid fa-share-nodes"></i></button>
     </div>
 
     <!-- الخريطة -->
@@ -368,6 +499,7 @@
 
     <!-- Leaflet Script -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
 
     <script>
         // إعداد الخريطة
@@ -406,6 +538,195 @@
         let simTimer = null;
         let voiceEnabled = true;
         let lastSpokenIndex = -1;
+
+        // --- نظام الإدارة وتعديل الخريطة ---
+        let isAdminMode = false;
+        let drawnItems = new L.FeatureGroup().addTo(map);
+        let currentDrawHandler = null;
+        let customFeatures = JSON.parse(localStorage.getItem('custom_map_features')) || [];
+
+        // تحميل البيانات المحفوظة مسبقاً
+        function loadCustomFeatures() {
+            customFeatures.forEach(feat => {
+                let layer;
+                if (feat.type === 'polyline') {
+                    layer = L.polyline(feat.latlngs, { color: feat.options.color || '#f59e0b', weight: 5 });
+                } else if (feat.type === 'marker') {
+                    const icon = getCustomIcon(feat.subType);
+                    layer = L.marker(feat.latlng, { icon: icon });
+                }
+                
+                if (layer) {
+                    if (feat.name) layer.bindPopup(feat.name);
+                    drawnItems.addLayer(layer);
+                }
+            });
+        }
+        loadCustomFeatures();
+
+        function getCustomIcon(subType) {
+            let color = '#38bdf8';
+            let iconClass = 'fa-circle-info';
+            
+            if (subType === 'bridge') {
+                color = '#ef4444';
+                iconClass = 'fa-bridge-lock';
+            }
+            
+            return L.divIcon({
+                html: `<div style="color:${color}; font-size: 1.5rem; filter: drop-shadow(0 0 5px rgba(0,0,0,0.5));">
+                        <i class="fa-solid ${iconClass}"></i>
+                       </div>`,
+                className: 'custom-marker',
+                iconSize: [30, 30],
+                iconAnchor: [15, 15]
+            });
+        }
+
+        function toggleAdminPanel() {
+            isAdminMode = !isAdminMode;
+            const panel = document.getElementById('admin-panel');
+            const badge = document.getElementById('admin-badge');
+            panel.style.display = isAdminMode ? 'flex' : 'none';
+            badge.style.display = isAdminMode ? 'block' : 'none';
+            
+            if (!isAdminMode) {
+                if (currentDrawHandler) currentDrawHandler.disable();
+                document.querySelectorAll('.admin-btn').forEach(b => b.classList.remove('admin-active'));
+            }
+        }
+
+        function startDrawing(type, subType) {
+            if (currentDrawHandler) currentDrawHandler.disable();
+            document.querySelectorAll('.admin-btn').forEach(b => b.classList.remove('admin-active'));
+            
+            let handler;
+            if (type === 'polyline') {
+                handler = new L.Draw.Polyline(map, { shapeOptions: { color: '#f59e0b', weight: 5 } });
+                document.getElementById('btn-draw-road').classList.add('admin-active');
+            } else if (type === 'marker') {
+                handler = new L.Draw.Marker(map);
+                if (subType === 'bridge') document.getElementById('btn-draw-bridge').classList.add('admin-active');
+                else document.getElementById('btn-draw-info').classList.add('admin-active');
+            }
+            
+            if (handler) {
+                handler.subType = subType;
+                handler.enable();
+                currentDrawHandler = handler;
+            }
+        }
+
+        map.on(L.Draw.Event.CREATED, function (event) {
+            const layer = event.layer;
+            const type = event.layerType;
+            const subType = currentDrawHandler ? currentDrawHandler.subType : 'info';
+            
+            let name = prompt("أدخل اسماً أو وصفاً لهذا العنصر (اختياري):");
+            if (name) layer.bindPopup(name);
+            
+            if (type === 'marker') {
+                layer.setIcon(getCustomIcon(subType));
+            }
+            
+            drawnItems.addLayer(layer);
+            
+            // حفظ في المصفوفة المؤقتة
+            const featData = {
+                type: type,
+                subType: subType,
+                name: name,
+                options: layer.options
+            };
+            
+            if (type === 'polyline') {
+                featData.latlngs = layer.getLatLngs();
+            } else {
+                featData.latlng = layer.getLatLng();
+            }
+            
+            customFeatures.push(featData);
+            document.querySelectorAll('.admin-btn').forEach(b => b.classList.remove('admin-active'));
+            currentDrawHandler = null;
+        });
+
+        function saveAdminData() {
+            localStorage.setItem('custom_map_features', JSON.stringify(customFeatures));
+            alert('تم حفظ التغييرات بنجاح على جهازك');
+        }
+
+        function clearAdminData() {
+            if (confirm('هل أنت متأكد من مسح كافة التعديلات المضافة؟')) {
+                drawnItems.clearLayers();
+                customFeatures = [];
+                localStorage.removeItem('custom_map_features');
+            }
+        }
+
+        // --- ميزات إضافية ---
+        async function searchNearby(type) {
+            let center = map.getCenter();
+            if (startPoint) center = startPoint;
+            
+            const url = `https://nominatim.openstreetmap.org/search?format=json&q=${type}&lat=${center.lat}&lon=${center.lng}&bounded=1&viewbox=${center.lng-0.05},${center.lat+0.05},${center.lng+0.05},${center.lat-0.05}`;
+            
+            try {
+                const res = await fetch(url);
+                const data = await res.json();
+                if (data.length > 0) {
+                    setDestination(L.latLng(parseFloat(data[0].lat), parseFloat(data[0].lon)), data[0].display_name.split(',')[0]);
+                } else {
+                    alert('لم يتم العثور على نتائج قريبة.');
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        function shareLocation() {
+            const pos = startPoint || map.getCenter();
+            const url = `https://www.google.com/maps?q=${pos.lat},${pos.lng}`;
+            if (navigator.share) {
+                navigator.share({
+                    title: 'موقعي الحالي',
+                    text: 'شاهد موقعي على الخريطة:',
+                    url: url
+                });
+            } else {
+                prompt('انسخ الرابط لمشاركة موقعك:', url);
+            }
+        }
+
+        function addReport(type, label) {
+            const latlng = startPoint || map.getCenter();
+            const report = { type, label, latlng, time: Date.now() };
+            
+            reports.push(report);
+            localStorage.setItem('map_reports', JSON.stringify(reports));
+            
+            displayReport(report);
+            toggleReportMenu();
+        }
+        
+        function displayReport(r) {
+            const icon = L.divIcon({
+                html: `<div style="color:var(--danger); font-size: 1.2rem; background: white; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 10px rgba(0,0,0,0.3);">
+                        <i class="fa-solid ${r.type === 'traffic' ? 'fa-car-burst' : r.type === 'accident' ? 'fa-burst' : 'fa-road-barrier'}"></i>
+                       </div>`,
+                className: 'report-marker',
+                iconSize: [24, 24]
+            });
+            L.marker(r.latlng, { icon: icon }).bindPopup(r.label + '<br><small>' + new Date(r.time).toLocaleString('ar-IQ') + '</small>').addTo(map);
+        }
+
+        function loadReports() {
+            // تنظيف البلاغات القديمة (أكثر من 4 ساعات)
+            const fourHours = 4 * 60 * 60 * 1000;
+            reports = reports.filter(r => (Date.now() - r.time) < fourHours);
+            localStorage.setItem('map_reports', JSON.stringify(reports));
+            reports.forEach(displayReport);
+        }
+        loadReports();
 
         // النقر على الخريطة
         map.on('click', function(e) {
@@ -523,7 +844,9 @@
                     const iconEl = document.querySelector('.car-cursor');
                     if (iconEl) iconEl.style.transform = `rotate(${heading - 45}deg)`;
 
-                    document.getElementById('live-speed').innerText = speed;
+                    const speedValEl = document.getElementById('live-speed');
+                    speedValEl.innerText = speed;
+                    speedValEl.style.color = speed > 100 ? 'var(--danger)' : 'var(--accent)';
 
                     updateNavigationHUD(currentPos);
                 },
@@ -553,7 +876,11 @@
                 userVehicleMarker.setLatLng(curr);
                 map.panTo(curr, { animate: true, duration: 0.3 });
 
-                document.getElementById('live-speed').innerText = Math.floor(Math.random() * 15) + 40;
+                const speed = Math.floor(Math.random() * 15) + 40;
+                const speedValEl = document.getElementById('live-speed');
+                speedValEl.innerText = speed;
+                speedValEl.style.color = speed > 100 ? 'var(--danger)' : 'var(--accent)';
+                
                 updateNavigationHUD(curr);
             }, 700);
         }

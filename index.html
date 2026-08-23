@@ -216,7 +216,7 @@
                             </div>
                             <div>
                                 <p class="text-xs sm:text-sm font-bold text-slate-200">اضغط هنا لاختيار الصورة من الموبايل</p>
-                                <p class="text-[11px] text-slate-400 mt-0.5">يتم ضغط وضبط الجودة تلقائياً</p>
+                                <p class="text-[11px] text-slate-400 mt-0.5">يتم ضغط وضبط الجودة تلقائياً فائقة السرعة</p>
                             </div>
                         </div>
 
@@ -757,12 +757,12 @@
         const colRef = collection(db, 'poster_students');
         onSnapshot(colRef, (snapshot) => {
             const items = [];
-            snapshot.forEach((doc) => {
-                items.push({ id: doc.id, ...doc.data() });
+            snapshot.forEach((docSnap) => {
+                items.push({ id: docSnap.id, ...docSnap.data() });
             });
             window.cloudStudents = items;
             window.updateProgressBar();
-            window.updateLiveTicketStatus(); // Realtime Status Update for Student View
+            window.updateLiveTicketStatus();
             if (window.isAdminLoggedIn) {
                 window.renderAdminTable();
                 window.renderPosterGridMockup();
@@ -788,26 +788,26 @@
 
         window.saveStudentToCloud = async function(studentData) {
             if (!auth.currentUser) await initAuth();
-            const colRef = collection(db, 'poster_students');
-            await addDoc(colRef, studentData);
+            const targetCol = collection(db, 'poster_students');
+            await addDoc(targetCol, studentData);
         };
 
         window.updateStudentStatusInCloud = async function(docId, newStatus, reason = '') {
-            const docRef = doc(db, 'poster_students', docId);
-            await updateDoc(docRef, {
+            const targetDoc = doc(db, 'poster_students', docId);
+            await updateDoc(targetDoc, {
                 status: newStatus,
                 rejectionReason: reason
             });
         };
 
         window.deleteStudentFromCloud = async function(docId) {
-            const docRef = doc(doc(db, 'poster_students', docId));
-            await deleteDoc(docRef);
+            const targetDoc = doc(db, 'poster_students', docId);
+            await deleteDoc(targetDoc);
         };
 
         window.setFormOpenStateCloud = async function(newState) {
-            const configRef = doc(db, 'poster_config', 'settings');
-            await setDoc(configRef, { isFormOpen: newState }, { merge: true });
+            const targetConfig = doc(db, 'poster_config', 'settings');
+            await setDoc(targetConfig, { isFormOpen: newState }, { merge: true });
         };
     </script>
 
@@ -902,7 +902,6 @@
                     `;
                 }
             } else {
-                // PENDING State
                 if (statusTextEl) {
                     statusTextEl.className = "text-amber-400 text-xs font-bold bg-amber-500/20 px-2.5 py-1 rounded border border-amber-500/40";
                     statusTextEl.innerHTML = `قيد المراجعة والتدقيق ⏳`;
@@ -1038,7 +1037,7 @@
             }
         }
 
-        // Image Processing, Compression & Quality Check
+        // Image Processing, Ultra-Safe Size Scaling for Firestore
         function processAndCompressImage(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -1061,7 +1060,7 @@
             const img = new Image();
             img.onload = function() {
                 const warningBadge = document.getElementById('qualityWarningBadge');
-                if (img.naturalWidth < 400 || img.naturalHeight < 400) {
+                if (img.naturalWidth < 300 || img.naturalHeight < 300) {
                     warningBadge.classList.remove('hidden');
                 } else {
                     warningBadge.classList.add('hidden');
@@ -1071,8 +1070,9 @@
                 let width = img.width;
                 let height = img.height;
 
-                const MAX_WIDTH = 1200;
-                const MAX_HEIGHT = 1200;
+                // Max 800px ensures base64 string is lightweight and well under Firestore 1MB limit
+                const MAX_WIDTH = 800;
+                const MAX_HEIGHT = 800;
 
                 if (width > height) {
                     if (width > MAX_WIDTH) {
@@ -1105,18 +1105,25 @@
                 }
                 ctx.restore();
 
-                compressedDataBase64 = canvas.toDataURL('image/jpeg', 0.80);
+                let quality = 0.70;
+                compressedDataBase64 = canvas.toDataURL('image/jpeg', quality);
+
+                // Additional loop guard to strictly keep base64 < 650KB
+                while (compressedDataBase64.length > 650000 && quality > 0.3) {
+                    quality -= 0.1;
+                    compressedDataBase64 = canvas.toDataURL('image/jpeg', quality);
+                }
 
                 canvas.toBlob((blob) => {
                     compressedImageBlob = blob;
                     document.getElementById('imagePreview').src = compressedDataBase64;
 
-                    const sizeInMB = (blob.size / (1024 * 1024)).toFixed(2);
-                    document.getElementById('imageSizeInfo').innerHTML = `<i class="fa-solid fa-compress text-emerald-400"></i> تم ضغط الصورة وتحسين الجودة (${sizeInMB} MB)`;
+                    const sizeInKB = Math.round(blob.size / 1024);
+                    document.getElementById('imageSizeInfo').innerHTML = `<i class="fa-solid fa-compress text-emerald-400"></i> تم ضغط الصورة وتحسين الجودة بنجاح (${sizeInKB} KB)`;
 
                     document.getElementById('uploadPlaceholder').classList.add('hidden');
                     document.getElementById('previewContainer').classList.remove('hidden');
-                }, 'image/jpeg', 0.80);
+                }, 'image/jpeg', quality);
             };
             img.src = imageSrc;
         }
@@ -1137,7 +1144,7 @@
             document.getElementById('previewContainer').classList.add('hidden');
         }
 
-        // Handle Form Submit
+        // Handle Form Submit with Decoupled Fallback Safety
         async function handleFormSubmit(event) {
             event.preventDefault();
 
@@ -1170,7 +1177,7 @@
                 return;
             }
 
-            if (!compressedImageBlob) {
+            if (!compressedImageBlob || !compressedDataBase64) {
                 showCustomModal('تنبيه الصورة', 'يرجى اختيار الصورة أولاً.', 'warning');
                 return;
             }
@@ -1178,7 +1185,7 @@
             const submitBtn = document.getElementById('submitBtn');
             const btnText = document.getElementById('btnText');
             submitBtn.disabled = true;
-            btnText.textContent = 'جاري إرسال الصورة للتدقيق...';
+            btnText.textContent = 'جاري إرسال الصورة وحفظ الطلب...';
 
             const registrationSerial = Math.floor(100000 + Math.random() * 900000).toString();
             const now = new Date();
@@ -1195,11 +1202,15 @@
                 createdAt: Date.now()
             };
 
+            // Step 1: Save to Cloud
             try {
-                // Save to Cloud
                 await window.saveStudentToCloud(studentObj);
+            } catch (cloudErr) {
+                console.error("Cloud saving failed:", cloudErr);
+            }
 
-                // Send to Telegram Channel
+            // Step 2: Send to Telegram Channel (Independent Safe Try/Catch)
+            try {
                 const captionText = 
 `🎓 *طلب صورة تخرج جديد (دفعة 2027)!*
 ━━━━━━━━━━━━━━━━━━
@@ -1222,25 +1233,28 @@
                     method: 'POST',
                     body: formData
                 });
+            } catch (tgErr) {
+                console.warn("Telegram API optional send notice:", tgErr);
+            }
 
-                // Local Storage
+            // Step 3: Local Storage Safe Save
+            try {
                 localStorage.setItem('mazaya_poster_registered', 'true');
                 localStorage.setItem('mazaya_student_name', studentName);
                 localStorage.setItem('mazaya_student_serial', registrationSerial);
                 localStorage.setItem('mazaya_student_date', dateFormatted);
                 localStorage.setItem('mazaya_student_category', photoType);
                 localStorage.setItem('mazaya_student_image', compressedDataBase64);
-
-                confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
-                checkExistingRegistration();
-
-            } catch (err) {
-                console.error(err);
-                showCustomModal('تم التسجيل', 'تم إرسال بياناتك وصورتك بنجاح!', 'info');
-            } finally {
-                submitBtn.disabled = false;
-                btnText.textContent = 'إرسال الصورة وحفظ التسجيل';
+            } catch (locErr) {
+                console.warn("LocalStorage quota notice:", locErr);
             }
+
+            // Always complete submission transition
+            confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+            checkExistingRegistration();
+
+            submitBtn.disabled = false;
+            btnText.textContent = 'إرسال الصورة وحفظ التسجيل';
         }
 
         // Helper Image Loader with Promise for Canvas

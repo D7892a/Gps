@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>بوستر التخرج ولوحة الإدارة | كلية مزايا الجامعة 2027</title>
+    <title>منصة بوستر التخرج ولوحة الإدارة الشاملة | كلية مزايا الجامعة 2027</title>
     <!-- Google Fonts & Font Awesome Icons -->
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Libraries: Canvas Confetti, SheetJS, html2pdf, QRCode -->
+    <!-- Libraries: Canvas Confetti, SheetJS (xlsx-js-style), html2pdf, QRCode -->
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <!-- Tailwind CSS CDN -->
@@ -38,7 +38,7 @@
             color: #f8fafc;
         }
         .glass-card {
-            background: rgba(17, 24, 39, 0.85);
+            background: rgba(17, 24, 39, 0.88);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             border: 1px solid rgba(212, 175, 55, 0.3);
@@ -51,12 +51,16 @@
         .gold-glow {
             box-shadow: 0 0 30px rgba(212, 175, 55, 0.2);
         }
+        /* Hidden canvas element for generator */
+        #storyCanvas {
+            display: none;
+        }
     </style>
 </head>
 <body class="flex flex-col justify-between min-h-screen p-3 sm:p-6">
 
     <!-- Top Navigation Bar -->
-    <nav class="w-full max-w-6xl mx-auto flex justify-between items-center mb-6 px-2">
+    <nav class="w-full max-w-6xl mx-auto flex justify-between items-center mb-4 px-2">
         <div class="flex items-center gap-2">
             <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
             <span class="text-xs font-bold text-slate-300">Firebase (tobe-23866) متصل ✅</span>
@@ -98,13 +102,37 @@
             </p>
         </header>
 
+        <!-- Progress Bar Indicator -->
+        <div class="glass-card rounded-2xl p-3 px-4 border border-slate-700/80 space-y-2">
+            <div class="flex justify-between items-center text-xs font-bold">
+                <span class="text-amber-300 flex items-center gap-1.5">
+                    <i class="fa-solid fa-chart-line"></i> نسبة اكتمال بوستر الدفعة:
+                </span>
+                <span id="progressBarText" class="text-emerald-400 font-mono">0% (0 طالب)</span>
+            </div>
+            <div class="w-full bg-slate-800 rounded-full h-3 overflow-hidden border border-slate-700">
+                <div id="progressBarFill" class="bg-gradient-to-r from-amber-500 via-emerald-400 to-emerald-500 h-full w-0 transition-all duration-700 rounded-full"></div>
+            </div>
+        </div>
+
+        <!-- Submission Closed Banner (Hidden by default) -->
+        <div id="formClosedBanner" class="hidden glass-card rounded-2xl p-4 border border-red-500/40 text-center space-y-2 bg-red-950/30">
+            <div class="w-10 h-10 bg-red-500/20 text-red-400 rounded-full mx-auto flex items-center justify-center text-xl">
+                <i class="fa-solid fa-lock"></i>
+            </div>
+            <h3 class="text-base font-bold text-white">تم إغلاق باب التقديم لانتهاء الموعد!</h3>
+            <p class="text-xs text-slate-300 leading-relaxed">
+                اكتملت الفترة المحددة لاستقبال الصور. يمكنك فقط الاستعلام عن حالة طلبك السابق من تبويب الاستعلام بالأسفل.
+            </p>
+        </div>
+
         <!-- Navigation Tabs: Register / Inquiry -->
         <div class="flex rounded-2xl bg-slate-900/90 p-1 border border-slate-800 text-xs sm:text-sm font-bold">
             <button id="tabRegisterBtn" onclick="switchStudentTab('register')" class="w-1/2 py-2.5 rounded-xl bg-amber-500 text-slate-950 font-black shadow transition">
                 <i class="fa-solid fa-pen-to-square ml-1"></i> تقديم طلب جديد
             </button>
             <button id="tabInquiryBtn" onclick="switchStudentTab('inquiry')" class="w-1/2 py-2.5 rounded-xl text-slate-400 hover:text-white transition">
-                <i class="fa-solid fa-key ml-1"></i> الاستعلام بالرقم التسلسلي فقط
+                <i class="fa-solid fa-key ml-1"></i> الاستعلام بالرقم التسلسلي
             </button>
         </div>
 
@@ -188,6 +216,11 @@
                         <div id="previewContainer" class="hidden relative">
                             <img id="imagePreview" src="#" alt="معاينة الصورة" class="max-h-52 mx-auto rounded-xl border-2 border-gold shadow-lg object-contain">
                             
+                            <!-- Quality & Ratio Warning Badge -->
+                            <div id="qualityWarningBadge" class="hidden mt-2 p-2 bg-amber-500/20 border border-amber-500/40 rounded-xl text-amber-300 text-xs font-semibold">
+                                <i class="fa-solid fa-triangle-exclamation"></i> تنبيه: أبعاد الصورة صغيرة، يُفضل اختيار صورة بدقة أعلى للبوستر.
+                            </div>
+
                             <!-- Image Controls -->
                             <div class="flex justify-center gap-2 mt-3" onclick="event.stopPropagation()">
                                 <button type="button" onclick="rotateImage()" class="bg-slate-800 hover:bg-slate-700 text-gold px-3 py-1.5 rounded-lg text-xs font-bold border border-slate-600">
@@ -214,7 +247,7 @@
             </form>
         </div>
 
-        <!-- TAB 2: Inquiry / Search Status Card (EXCLUSIVELY BY SERIAL NUMBER) -->
+        <!-- TAB 2: Inquiry / Search Status Card (NUMERIC SERIAL ONLY) -->
         <div id="inquiryTab" class="hidden glass-card gold-glow rounded-3xl p-5 sm:p-8 space-y-5">
             <div class="border-b border-slate-700/60 pb-3">
                 <h2 class="text-lg font-bold text-white flex items-center gap-2">
@@ -222,12 +255,12 @@
                     الاستعلام السري بالرقم التسلسلي فقط
                 </h2>
                 <p class="text-xs text-slate-400 mt-1">
-                    <i class="fa-solid fa-shield-halved text-amber-400"></i> خيار البحث بالاسم ملغى نهائياً لضمان الخصوصية. يرجى إدخال الرقم التسلسلي الخاص بك فقط (مثال: <span class="text-amber-300 font-mono">#123456</span>)
+                    <i class="fa-solid fa-shield-halved text-amber-400"></i> خيار البحث بالاسم ملغى نهائياً لضمان الخصوصية. يرجى إدخال الرقم التسلسلي الخاص بك بالأرقام فقط (مثال: <span class="text-amber-300 font-mono">566313</span>)
                 </p>
             </div>
 
             <div class="flex gap-2">
-                <input type="text" id="inquiryInput" placeholder="اكتب رقمك التسلسلي الخفي الخاص فقط..." 
+                <input type="text" id="inquiryInput" placeholder="اكتب رقمك التسلسلي (مثال: 566313)..." 
                        class="w-full py-3 px-4 bg-slate-900 border border-slate-700 rounded-xl text-sm text-white focus:border-gold outline-none font-mono">
                 <button onclick="searchStudentBySerialOnly()" class="px-5 py-3 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold rounded-xl text-sm transition">
                     بحث
@@ -271,7 +304,7 @@
                     </div>
                     <div class="text-left">
                         <span class="text-[10px] text-slate-400 block">الرقم التسلسلي الخفي</span>
-                        <span id="ticketSerial" class="text-white font-mono font-bold text-sm bg-amber-500/20 px-2.5 py-1 rounded border border-amber-500/40">#000000</span>
+                        <span id="ticketSerial" class="text-white font-mono font-bold text-sm bg-amber-500/20 px-2.5 py-1 rounded border border-amber-500/40">000000</span>
                     </div>
                 </div>
 
@@ -296,127 +329,196 @@
                 </div>
             </div>
 
-            <!-- Navigation Buttons inside Ticket Card -->
-            <div class="pt-2 border-t border-slate-800 flex flex-col sm:flex-row gap-2">
-                <button onclick="switchStudentTab('inquiry')" class="w-full py-2.5 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 rounded-xl text-xs font-bold transition">
-                    <i class="fa-solid fa-magnifying-glass ml-1"></i> الانتقال لصفحة الاستعلام بالرقم
+            <!-- Story Share & Action Buttons -->
+            <div class="pt-2 border-t border-slate-800 flex flex-col gap-2">
+                <button onclick="generateAndDownloadStoryCard()" class="w-full py-3 bg-gradient-to-r from-purple-600 via-pink-600 to-amber-500 hover:from-purple-700 hover:to-amber-600 text-white font-bold rounded-xl text-xs transition shadow-lg flex items-center justify-center gap-2">
+                    <i class="fa-brands fa-instagram text-base"></i> تنزيل بطاقة التخرج كـ Story (انستغرام / تلغرام)
                 </button>
-                <a id="cardSupportBtn" href="https://t.me/li_b11" target="_blank" class="w-full py-2.5 bg-blue-600/30 hover:bg-blue-600/50 text-blue-300 border border-blue-500/30 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1">
-                    <i class="fa-brands fa-telegram"></i> مراسلة الدعم (@li_b11)
-                </a>
+
+                <div class="flex flex-col sm:flex-row gap-2">
+                    <button onclick="switchStudentTab('inquiry')" class="w-full py-2.5 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 rounded-xl text-xs font-bold transition">
+                        <i class="fa-solid fa-magnifying-glass ml-1"></i> الاستعلام بالرقم
+                    </button>
+                    <a id="cardSupportBtn" href="https://t.me/li_b11" target="_blank" class="w-full py-2.5 bg-blue-600/30 hover:bg-blue-600/50 text-blue-300 border border-blue-500/30 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1">
+                        <i class="fa-brands fa-telegram"></i> مراسلة الدعم (@li_b11)
+                    </a>
+                </div>
             </div>
         </div>
 
     </div>
 
     <!-- ================================================================= -->
-    <!-- SECTION 2: ISOLATED ADMIN DASHBOARD (لوحة الإدارة المعزولة)         -->
+    <!-- SECTION 2: ISOLATED ADMIN DASHBOARD (لوحة الإدارة الشاملة)        -->
     <!-- ================================================================= -->
-    <div id="adminView" class="hidden w-full max-w-6xl mx-auto my-auto space-y-6">
+    <div id="adminView" class="hidden w-full max-w-6xl mx-auto my-auto space-y-5">
         
-        <!-- Admin Header -->
+        <!-- Admin Header & Form Status Control -->
         <div class="glass-card rounded-2xl p-4 sm:p-6 flex flex-col md:flex-row justify-between items-center gap-4">
             <div class="flex items-center gap-3">
                 <div class="w-12 h-12 bg-amber-500/10 border border-amber-500/30 rounded-xl flex items-center justify-center text-gold text-2xl">
                     <i class="fa-solid fa-user-shield"></i>
                 </div>
                 <div>
-                    <h2 class="text-xl sm:text-2xl font-black text-white">لوحة إدارة بوستر التخرج السحابية 👑</h2>
-                    <p class="text-xs text-slate-400">إدارة التدقيق والقبول - دفعة 2027 (tobe-23866)</p>
+                    <h2 class="text-xl sm:text-2xl font-black text-white">لوحة إدارة بوستر التخرج الشاملة 👑</h2>
+                    <p class="text-xs text-slate-400">إدارة التدقيق، المعاينة، وتعديل إعدادات الدفعة (2027)</p>
                 </div>
             </div>
 
-            <!-- Admin Support Link Box -->
-            <div class="bg-slate-900/90 border border-amber-500/30 p-2.5 px-4 rounded-2xl flex items-center gap-3">
-                <div class="text-right text-xs">
-                    <span class="text-amber-400 font-bold block"><i class="fa-brands fa-telegram"></i> حساب الدعم الفني المثبت:</span>
-                    <span class="text-slate-300 font-mono font-bold">@li_b11</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Stats Bar -->
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <div class="glass-card p-3.5 rounded-2xl text-center border-b-2 border-amber-400">
-                <span class="text-xs text-slate-400 block">إجمالي الطلبات</span>
-                <span id="statTotal" class="text-xl font-bold text-white">0</span>
-            </div>
-            <div class="glass-card p-3.5 rounded-2xl text-center border-b-2 border-emerald-400">
-                <span class="text-xs text-slate-400 block">المقبولة والظاهرة</span>
-                <span id="statApproved" class="text-xl font-bold text-emerald-400">0</span>
-            </div>
-            <div class="glass-card p-3.5 rounded-2xl text-center border-b-2 border-amber-500">
-                <span class="text-xs text-slate-400 block">قيد المراجعة والتدقيق</span>
-                <span id="statPending" class="text-xl font-bold text-amber-400">0</span>
-            </div>
-            <div class="glass-card p-3.5 rounded-2xl text-center border-b-2 border-red-500">
-                <span class="text-xs text-slate-400 block">الطلبات المرفوضة</span>
-                <span id="statRejected" class="text-xl font-bold text-red-400">0</span>
-            </div>
-        </div>
-
-        <!-- Action Control Bar -->
-        <div class="glass-card rounded-2xl p-4 flex flex-col md:flex-row gap-3 justify-between items-center">
-            
-            <!-- Search & Filter -->
-            <div class="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
-                <div class="relative w-full sm:w-64">
-                    <i class="fa-solid fa-magnifying-glass absolute right-3 top-3 text-slate-400 text-xs"></i>
-                    <input type="text" id="searchInput" oninput="renderAdminTable()" placeholder="بحث باسم الطالب أو السيريال..." 
-                           class="w-full pr-9 pl-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:border-gold outline-none">
-                </div>
-                <select id="filterType" onchange="renderAdminTable()" class="bg-slate-900 border border-slate-700 text-xs text-white py-2 px-3 rounded-xl focus:border-gold outline-none">
-                    <option value="ALL">جميع الحالات</option>
-                    <option value="APPROVED">المقبولة فقط ✅</option>
-                    <option value="PENDING">قيد الانتظار ⏳</option>
-                    <option value="REJECTED">المرفوضة ❌</option>
-                </select>
-            </div>
-
-            <!-- Action Buttons -->
-            <div class="flex flex-wrap items-center gap-2 w-full md:w-auto justify-end">
-                <button onclick="exportToExcel()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-lg shadow-emerald-600/20">
-                    <i class="fa-solid fa-file-excel"></i> تصدير إكسل منسق ورسمي (Excel)
-                </button>
-                <button onclick="exitAdminView()" class="px-3.5 py-2 bg-red-900/50 hover:bg-red-800 text-red-300 rounded-xl text-xs font-bold border border-red-700 transition">
-                    خروج من الإدارة
+            <!-- Form Toggle Switch Button -->
+            <div class="flex items-center gap-3 bg-slate-900/90 border border-slate-700 p-2.5 px-4 rounded-2xl">
+                <span class="text-xs font-bold text-slate-300">حالة التقديم للطلاب:</span>
+                <button id="formStatusToggleBtn" onclick="toggleFormOpenState()" class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow">
+                    <!-- Dynamic state text -->
                 </button>
             </div>
         </div>
 
-        <!-- Database Students Table -->
-        <div class="glass-card rounded-2xl overflow-hidden">
-            <div class="overflow-x-auto">
-                <table class="w-full text-right text-xs sm:text-sm text-slate-300">
-                    <thead class="bg-slate-900/90 text-slate-400 font-bold border-b border-slate-800">
-                        <tr>
-                            <th class="p-3.5">#</th>
-                            <th class="p-3.5">الصورة</th>
-                            <th class="p-3.5">الاسم الثلاثي</th>
-                            <th class="p-3.5">النوع</th>
-                            <th class="p-3.5">الرقم التسلسلي</th>
-                            <th class="p-3.5">الحالة الحالية</th>
-                            <th class="p-3.5 text-center">قرار الإدارة والقبول</th>
-                            <th class="p-3.5 text-center">الإجراءات</th>
-                        </tr>
-                    </thead>
-                    <tbody id="studentsTableBody" class="divide-y divide-slate-800/60">
-                        <!-- Dynamic Rows -->
-                    </tbody>
-                </table>
-            </div>
+        <!-- Admin View Sub-Tabs (Table / Poster Mockup / Quotes) -->
+        <div class="flex rounded-2xl bg-slate-900/90 p-1 border border-slate-800 text-xs sm:text-sm font-bold">
+            <button id="adminSubTabTableBtn" onclick="switchAdminSubTab('table')" class="w-1/3 py-2.5 rounded-xl bg-amber-500 text-slate-950 font-black transition">
+                <i class="fa-solid fa-table-list ml-1"></i> جدول الطلاب المباشر
+            </button>
+            <button id="adminSubTabMockupBtn" onclick="switchAdminSubTab('mockup')" class="w-1/3 py-2.5 rounded-xl text-slate-400 hover:text-white transition">
+                <i class="fa-solid fa-border-all ml-1"></i> المعاينة المبدئية للبوستر
+            </button>
+            <button id="adminSubTabQuotesBtn" onclick="switchAdminSubTab('quotes')" class="w-1/3 py-2.5 rounded-xl text-slate-400 hover:text-white transition">
+                <i class="fa-solid fa-quote-right ml-1"></i> سجل الإهداءات والعبارات
+            </button>
+        </div>
+
+        <!-- SUB-TAB 1: Table & Actions View -->
+        <div id="adminSubTabTable" class="space-y-4">
             
-            <div id="emptyState" class="hidden p-10 text-center text-slate-500">
-                <i class="fa-solid fa-folder-open text-4xl mb-3 block text-slate-600"></i>
-                <p class="text-sm font-semibold">لا يوجد طلاب مسجلون في السحاب حالياً</p>
+            <!-- Stats Bar -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <div class="glass-card p-3.5 rounded-2xl text-center border-b-2 border-amber-400">
+                    <span class="text-xs text-slate-400 block">إجمالي الطلبات</span>
+                    <span id="statTotal" class="text-xl font-bold text-white">0</span>
+                </div>
+                <div class="glass-card p-3.5 rounded-2xl text-center border-b-2 border-emerald-400">
+                    <span class="text-xs text-slate-400 block">المقبولة والظاهرة</span>
+                    <span id="statApproved" class="text-xl font-bold text-emerald-400">0</span>
+                </div>
+                <div class="glass-card p-3.5 rounded-2xl text-center border-b-2 border-amber-500">
+                    <span class="text-xs text-slate-400 block">قيد المراجعة والتدقيق</span>
+                    <span id="statPending" class="text-xl font-bold text-amber-400">0</span>
+                </div>
+                <div class="glass-card p-3.5 rounded-2xl text-center border-b-2 border-red-500">
+                    <span class="text-xs text-slate-400 block">الطلبات المرفوضة</span>
+                    <span id="statRejected" class="text-xl font-bold text-red-400">0</span>
+                </div>
+            </div>
+
+            <!-- Action Control Bar -->
+            <div class="glass-card rounded-2xl p-4 flex flex-col md:flex-row gap-3 justify-between items-center">
+                
+                <!-- Search & Filter -->
+                <div class="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
+                    <div class="relative w-full sm:w-64">
+                        <i class="fa-solid fa-magnifying-glass absolute right-3 top-3 text-slate-400 text-xs"></i>
+                        <input type="text" id="searchInput" oninput="renderAdminTable()" placeholder="بحث باسم الطالب أو السيريال..." 
+                               class="w-full pr-9 pl-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:border-gold outline-none">
+                    </div>
+                    <select id="filterType" onchange="renderAdminTable()" class="bg-slate-900 border border-slate-700 text-xs text-white py-2 px-3 rounded-xl focus:border-gold outline-none">
+                        <option value="ALL">جميع الحالات</option>
+                        <option value="APPROVED">المقبولة فقط ✅</option>
+                        <option value="PENDING">قيد الانتظار ⏳</option>
+                        <option value="REJECTED">المرفوضة ❌</option>
+                    </select>
+                </div>
+
+                <!-- Export Action Buttons -->
+                <div class="flex flex-wrap items-center gap-2 w-full md:w-auto justify-end">
+                    <button onclick="exportToExcel()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow">
+                        <i class="fa-solid fa-file-excel"></i> تصدير إكسل ملون
+                    </button>
+                    <button onclick="exportBulkApprovedPDF()" class="px-3.5 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow">
+                        <i class="fa-solid fa-file-pdf"></i> تصدير PDF موحّد لكل الاستمارات
+                    </button>
+                    <button onclick="exitAdminView()" class="px-3 py-2 bg-red-900/50 hover:bg-red-800 text-red-300 rounded-xl text-xs font-bold border border-red-700 transition">
+                        خروج
+                    </button>
+                </div>
+            </div>
+
+            <!-- Database Students Table -->
+            <div class="glass-card rounded-2xl overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-right text-xs sm:text-sm text-slate-300">
+                        <thead class="bg-slate-900/90 text-slate-400 font-bold border-b border-slate-800">
+                            <tr>
+                                <th class="p-3.5">#</th>
+                                <th class="p-3.5">الصورة</th>
+                                <th class="p-3.5">الاسم الثلاثي</th>
+                                <th class="p-3.5">النوع</th>
+                                <th class="p-3.5">الرقم التسلسلي</th>
+                                <th class="p-3.5">الحالة الحالية</th>
+                                <th class="p-3.5 text-center">قرار الإدارة والقبول</th>
+                                <th class="p-3.5 text-center">الإجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="studentsTableBody" class="divide-y divide-slate-800/60">
+                            <!-- Dynamic Rows -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div id="emptyState" class="hidden p-10 text-center text-slate-500">
+                    <i class="fa-solid fa-folder-open text-4xl mb-3 block text-slate-600"></i>
+                    <p class="text-sm font-semibold">لا يوجد طلاب مسجلون حالياً</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- SUB-TAB 2: Poster Grid Mockup View -->
+        <div id="adminSubTabMockup" class="hidden glass-card rounded-2xl p-5 space-y-4">
+            <div class="flex justify-between items-center border-b border-slate-700/80 pb-3">
+                <div>
+                    <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-border-all text-gold"></i>
+                        المعاينة المبدئية لصور الطلاب المقبولة على البوستر
+                    </h3>
+                    <p class="text-xs text-slate-400 mt-0.5">معاينة شبكية لصور التخرج والطفولة المقبولة رسمياً</p>
+                </div>
+                <span id="mockupCountBadge" class="bg-amber-500/20 text-amber-300 text-xs font-bold px-3 py-1 rounded-full border border-amber-500/30">
+                    0 صورة معتمدة
+                </span>
+            </div>
+
+            <div id="posterGridContainer" class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-3 pt-2">
+                <!-- Dynamic Poster Grid Items -->
+            </div>
+        </div>
+
+        <!-- SUB-TAB 3: Quotes Collector View -->
+        <div id="adminSubTabQuotes" class="hidden glass-card rounded-2xl p-5 space-y-4">
+            <div class="flex justify-between items-center border-b border-slate-700/80 pb-3">
+                <div>
+                    <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-quote-right text-gold"></i>
+                        سجل إهداءات وعبارات التخرج لطلاب الدفعة
+                    </h3>
+                    <p class="text-xs text-slate-400 mt-0.5">مجموعة العبارات المسجلة لاستخدامها في المجلة أو الكتيب السنوي</p>
+                </div>
+                <button onclick="copyAllQuotesToClipboard()" class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold rounded-xl text-xs transition shadow">
+                    <i class="fa-solid fa-copy ml-1"></i> نسخ جميع العبارات
+                </button>
+            </div>
+
+            <div id="quotesListContainer" class="space-y-3 pt-1">
+                <!-- Dynamic Quotes List -->
             </div>
         </div>
 
     </div>
 
-    <!-- Perfectly Scaled Hidden Container for Printable PDF Document -->
-    <div style="position: fixed; left: -9999px; top: 0; width: 1000px; height: 670px; overflow: hidden; pointer-events: none; opacity: 0; z-index: -9999;">
-        <div id="pdfCardTemplate" style="width: 1000px; height: 670px; padding: 35px; background: #ffffff; color: #0f172a; font-family: 'Cairo', sans-serif; direction: rtl; box-sizing: border-box; border: 8px solid #D4AF37; border-radius: 28px; display: flex; flex-direction: column; justify-content: space-between;">
+    <!-- Hidden Canvas for Story Generation -->
+    <canvas id="storyCanvas" width="1080" height="1920"></canvas>
+
+    <!-- Perfectly Scaled Hidden Container for Printable PDF Export (A4 Ratio) -->
+    <div style="position: absolute; left: -9999px; top: 0; width: 1122px; height: 793px; overflow: hidden; opacity: 1;">
+        <div id="pdfCardTemplate" style="width: 1122px; height: 793px; padding: 40px; background: #ffffff; color: #0f172a; font-family: 'Cairo', sans-serif; direction: rtl; box-sizing: border-box; border: 10px solid #D4AF37; display: flex; flex-direction: column; justify-content: space-between;">
             <!-- PDF Header -->
             <div class="flex justify-between items-center border-b-2 border-slate-300 pb-4">
                 <div>
@@ -435,7 +537,7 @@
             <div class="grid grid-cols-12 gap-8 items-center my-auto">
                 <!-- Image Container -->
                 <div class="col-span-5 text-center">
-                    <div class="w-60 h-72 mx-auto rounded-2xl border-4 border-amber-500 p-1.5 bg-slate-50 shadow-xl flex items-center justify-center overflow-hidden">
+                    <div class="w-64 h-80 mx-auto rounded-2xl border-4 border-amber-500 p-1.5 bg-slate-50 shadow-xl flex items-center justify-center overflow-hidden">
                         <img id="pdfStudentImage" src="" alt="صورة الطالب" class="w-full h-full object-cover rounded-xl">
                     </div>
                 </div>
@@ -454,7 +556,7 @@
                         </div>
                         <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">
                             <span class="text-xs text-slate-500 font-bold block mb-1">الرقم التسلسلي الخفي:</span>
-                            <span id="pdfSerial" class="text-base font-mono font-bold text-amber-600">#000000</span>
+                            <span id="pdfSerial" class="text-base font-mono font-bold text-amber-600">000000</span>
                         </div>
                     </div>
 
@@ -477,6 +579,53 @@
                     <p class="text-[11px] text-slate-500">حقوق الطبع والتوثيق محفوظة &copy; كلية مزايا الجامعة 2027</p>
                 </div>
                 <div id="pdfQrCode" class="bg-white p-1.5 border border-slate-300 rounded-xl shadow-sm"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden Bulk PDF Container -->
+    <div style="position: absolute; left: -9999px; top: 0; width: 1122px; opacity: 1;">
+        <div id="bulkPdfContainer"></div>
+    </div>
+
+    <!-- Quick Rejection Modal -->
+    <div id="rejectModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="glass-card border border-red-500/40 rounded-2xl max-w-md w-full p-5 text-right space-y-4 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+                <h4 class="text-base font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-circle-xmark text-red-400"></i> تحديد سبب رفض الطلب
+                </h4>
+                <button onclick="closeRejectModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <p class="text-xs text-slate-300">اختر من الأسباب السريعة أدناه أو اكتب سبباً مخصصاً ليظهر للطالب عند الاستعلام:</p>
+            
+            <div class="grid grid-cols-1 gap-2">
+                <button onclick="selectQuickRejectReason('الصورة غير واضحة أبعادها أو جودتها منخفضة')" class="p-2.5 bg-slate-900 hover:bg-slate-800 text-xs text-slate-200 rounded-xl border border-slate-700 text-right transition">
+                    ⚠️ الصورة غير واضحة أبعادها أو جودتها منخفضة
+                </button>
+                <button onclick="selectQuickRejectReason('وجه الطالب غير ظاهر بوضوح في الصورة')" class="p-2.5 bg-slate-900 hover:bg-slate-800 text-xs text-slate-200 rounded-xl border border-slate-700 text-right transition">
+                    👤 وجه الطالب غير ظاهر بوضوح في الصورة
+                </button>
+                <button onclick="selectQuickRejectReason('الصورة قصيرة أو مقطوعة من الأطراف')" class="p-2.5 bg-slate-900 hover:bg-slate-800 text-xs text-slate-200 rounded-xl border border-slate-700 text-right transition">
+                    ✂️ الصورة قصيرة أو مقطوعة من الأطراف
+                </button>
+                <button onclick="selectQuickRejectReason('الصورة غير رسمية أو مخالفة لشروط البوستر')" class="p-2.5 bg-slate-900 hover:bg-slate-800 text-xs text-slate-200 rounded-xl border border-slate-700 text-right transition">
+                    🚫 الصورة غير رسمية أو مخالفة لشروط البوستر
+                </button>
+            </div>
+
+            <div class="pt-1">
+                <input type="text" id="customRejectReasonInput" placeholder="أو اكتب سبباً مخصصاً هنا..." 
+                       class="w-full py-2.5 px-3 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:border-gold outline-none">
+            </div>
+
+            <div class="flex gap-2 pt-2">
+                <button onclick="confirmRejectReason()" class="w-full py-2 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl text-xs transition">
+                    تأكيد الرفض ❌
+                </button>
+                <button onclick="closeRejectModal()" class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-xl text-xs transition border border-slate-600">
+                    إلغاء
+                </button>
             </div>
         </div>
     </div>
@@ -525,14 +674,11 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // إعدادات البوت والقناة والرمز السري
+        // Telegram Bot & Channel Settings
         window.TELEGRAM_BOT_TOKEN = '8627770155:AAFB1hRBVMtPRLcLe0TtIQtZXZpS7DLcQ8A';
-        
-        // 🎯 معرّف القناة الخاص بك المربوط بالكامل مع البوت
-        window.TELEGRAM_CHAT_OR_CHANNEL_ID = '-1004364981555'; 
-
+        window.TELEGRAM_CHAT_OR_CHANNEL_ID = '-1004364981555'; // معرف القناة الخاصة
         window.ADMIN_PIN = '112110'; // الرمز الثابت للإدارة
 
         // Firebase Credentials (tobe-23866)
@@ -552,6 +698,7 @@
 
         window.db = db;
         window.cloudStudents = [];
+        window.isFormOpenGlobal = true;
 
         async function initAuth() {
             try {
@@ -562,19 +709,36 @@
         }
         initAuth();
 
+        // Listen to Students Database
         const colRef = collection(db, 'poster_students');
-
         onSnapshot(colRef, (snapshot) => {
             const items = [];
             snapshot.forEach((doc) => {
                 items.push({ id: doc.id, ...doc.data() });
             });
             window.cloudStudents = items;
+            window.updateProgressBar();
             if (window.isAdminLoggedIn) {
                 window.renderAdminTable();
+                window.renderPosterGridMockup();
+                window.renderQuotesList();
             }
         }, (error) => {
             console.error("Firestore error:", error);
+        });
+
+        // Listen to Form Settings (Open/Closed)
+        const configRef = doc(db, 'poster_config', 'settings');
+        onSnapshot(configRef, (docSnap) => {
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                window.isFormOpenGlobal = data.isFormOpen !== false;
+            } else {
+                window.isFormOpenGlobal = true;
+            }
+            window.applyFormOpenStateUI();
+        }, (err) => {
+            console.error(err);
         });
 
         window.saveStudentToCloud = async function(studentData) {
@@ -595,6 +759,11 @@
             const docRef = doc(db, 'poster_students', docId);
             await deleteDoc(docRef);
         };
+
+        window.setFormOpenStateCloud = async function(newState) {
+            const configRef = doc(db, 'poster_config', 'settings');
+            await setDoc(configRef, { isFormOpen: newState }, { merge: true });
+        };
     </script>
 
     <!-- App Logic Script -->
@@ -603,6 +772,8 @@
         let compressedDataBase64 = null;
         let currentRotation = 0;
         let originalImageSrc = null;
+        let pendingRejectDocId = null;
+
         window.isAdminLoggedIn = false;
         window.currentSupportLink = 'https://t.me/li_b11';
 
@@ -610,7 +781,55 @@
             checkExistingRegistration();
         });
 
-        // Switch Tabs Cleanly
+        // Form Open State UI Manager
+        window.applyFormOpenStateUI = function() {
+            const banner = document.getElementById('formClosedBanner');
+            const submitBtn = document.getElementById('submitBtn');
+            const toggleBtn = document.getElementById('formStatusToggleBtn');
+
+            if (!window.isFormOpenGlobal) {
+                banner.classList.remove('hidden');
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                    submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                    document.getElementById('btnText').textContent = 'التقديم مغلق حالياً';
+                }
+                if (toggleBtn) {
+                    toggleBtn.className = "px-3.5 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow";
+                    toggleBtn.innerHTML = '<i class="fa-solid fa-lock"></i> التقديم مغلق (اضغط للفتح)';
+                }
+            } else {
+                banner.classList.add('hidden');
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                    document.getElementById('btnText').textContent = 'إرسال الصورة وحفظ التسجيل';
+                }
+                if (toggleBtn) {
+                    toggleBtn.className = "px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow";
+                    toggleBtn.innerHTML = '<i class="fa-solid fa-lock-open"></i> التقديم مفتوح (اضغط للإغلاق)';
+                }
+            }
+        };
+
+        function toggleFormOpenState() {
+            const newState = !window.isFormOpenGlobal;
+            window.setFormOpenStateCloud(newState);
+            showCustomModal('تعديل حالة التقديم', newState ? 'تم فتح باب التقديم للطلاب بنجاح.' : 'تم إغلاق باب التقديم للطلاب بنجاح.', 'info');
+        }
+
+        // Progress Bar Calculation
+        window.updateProgressBar = function() {
+            const list = window.cloudStudents || [];
+            const count = list.length;
+            const target = 100; // Expected student target
+            const percent = Math.min(Math.round((count / target) * 100), 100);
+
+            document.getElementById('progressBarText').textContent = `${percent}% (${count} طالب)`;
+            document.getElementById('progressBarFill').style.width = `${percent}%`;
+        };
+
+        // Switch Student Tabs Cleanly
         function switchStudentTab(tab) {
             const regTab = document.getElementById('registrationTab');
             const inqTab = document.getElementById('inquiryTab');
@@ -643,7 +862,7 @@
             const isRegistered = localStorage.getItem('mazaya_poster_registered');
             if (isRegistered === 'true' && !window.isAdminLoggedIn) {
                 const name = localStorage.getItem('mazaya_student_name') || 'غير معروف';
-                const serial = localStorage.getItem('mazaya_student_serial') || '#100000';
+                const serial = (localStorage.getItem('mazaya_student_serial') || '100000').replace(/#/g, '');
                 const date = localStorage.getItem('mazaya_student_date') || new Date().toLocaleDateString('ar-IQ');
                 const category = localStorage.getItem('mazaya_student_category') || 'صورة تخرج';
 
@@ -666,7 +885,7 @@
             }
         }
 
-        // Image Processing & Compression
+        // Image Processing, Compression & Quality Check
         function processAndCompressImage(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -688,6 +907,14 @@
         function compressImageEngine(imageSrc) {
             const img = new Image();
             img.onload = function() {
+                // Quality & Resolution check
+                const warningBadge = document.getElementById('qualityWarningBadge');
+                if (img.naturalWidth < 400 || img.naturalHeight < 400) {
+                    warningBadge.classList.remove('hidden');
+                } else {
+                    warningBadge.classList.add('hidden');
+                }
+
                 const canvas = document.createElement('canvas');
                 let width = img.width;
                 let height = img.height;
@@ -758,9 +985,14 @@
             document.getElementById('previewContainer').classList.add('hidden');
         }
 
-        // Handle Form Submit (STRICT DUPLICATE NAME CHECK & TELEGRAM BOT NOTIFICATION TO CHANNEL)
+        // Handle Form Submit
         async function handleFormSubmit(event) {
             event.preventDefault();
+
+            if (!window.isFormOpenGlobal) {
+                showCustomModal('التقديم مغلق', 'تم إغلاق التقديم رسمياً لانتهاء الوقت المحدد.', 'warning');
+                return;
+            }
 
             const studentName = document.getElementById('studentName').value.trim();
             const photoType = document.getElementById('photoType').value;
@@ -771,7 +1003,7 @@
                 return;
             }
 
-            // Check duplicate name in Cloud
+            // Duplicate Name Check
             const normalizedNewName = studentName.replace(/\s+/g, ' ').toLowerCase();
             const isDuplicate = (window.cloudStudents || []).some(s => 
                 s.name && s.name.replace(/\s+/g, ' ').toLowerCase() === normalizedNewName
@@ -796,7 +1028,7 @@
             submitBtn.disabled = true;
             btnText.textContent = 'جاري إرسال الصورة للتدقيق...';
 
-            const registrationSerial = '#' + Math.floor(100000 + Math.random() * 900000);
+            const registrationSerial = Math.floor(100000 + Math.random() * 900000).toString();
             const now = new Date();
             const dateFormatted = now.toLocaleDateString('ar-IQ') + ' | ' + now.toLocaleTimeString('ar-IQ', { hour: '2-digit', minute: '2-digit' });
 
@@ -815,7 +1047,7 @@
                 // Save to Cloud
                 await window.saveStudentToCloud(studentObj);
 
-                // Send to Telegram Channel Automatically
+                // Send to Telegram Channel
                 const captionText = 
 `🎓 *طلب صورة تخرج جديد (دفعة 2027)!*
 ━━━━━━━━━━━━━━━━━━
@@ -858,7 +1090,87 @@
             }
         }
 
-        // Student Inquiry Search Function (STRICTLY BY SERIAL NUMBER ONLY)
+        // Generate Instagram Story Share Card (1080x1920)
+        function generateAndDownloadStoryCard() {
+            const name = localStorage.getItem('mazaya_student_name') || 'طالب تخرج';
+            const serial = (localStorage.getItem('mazaya_student_serial') || '566313').replace(/#/g, '');
+            const category = localStorage.getItem('mazaya_student_category') || 'صورة تخرج';
+
+            const canvas = document.getElementById('storyCanvas');
+            const ctx = canvas.getContext('2d');
+
+            // Canvas Background Gradient
+            const grad = ctx.createLinearGradient(0, 0, 0, 1920);
+            grad.addColorStop(0, '#0b0f19');
+            grad.addColorStop(0.5, '#1e1b4b');
+            grad.addColorStop(1, '#020617');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, 1080, 1920);
+
+            // Gold Outer Border
+            ctx.strokeStyle = '#D4AF37';
+            ctx.lineWidth = 20;
+            ctx.strokeRect(40, 40, 1000, 1840);
+
+            // Header Text
+            ctx.fillStyle = '#D4AF37';
+            ctx.font = 'bold 50px Cairo, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('كلية مزايا الجامعة - قسم B', 540, 180);
+
+            ctx.fillStyle = '#FFFFFF';
+            ctx.font = 'black 80px Cairo, sans-serif';
+            ctx.fillText('دفعة "To Be Not To Be" 2027', 540, 280);
+
+            // Student Photo Frame
+            const studentImg = new Image();
+            studentImg.src = compressedDataBase64 || document.getElementById('imagePreview').src;
+
+            studentImg.onload = function() {
+                // Draw Image Frame
+                ctx.save();
+                ctx.strokeStyle = '#D4AF37';
+                ctx.lineWidth = 12;
+                ctx.strokeRect(190, 360, 700, 850);
+
+                ctx.drawImage(studentImg, 200, 370, 680, 830);
+                ctx.restore();
+
+                // Student Details Box
+                ctx.fillStyle = 'rgba(15, 23, 42, 0.9)';
+                ctx.fillRect(140, 1280, 800, 420);
+                ctx.strokeStyle = 'rgba(212, 175, 55, 0.5)';
+                ctx.lineWidth = 4;
+                ctx.strokeRect(140, 1280, 800, 420);
+
+                // Student Name
+                ctx.fillStyle = '#FFFFFF';
+                ctx.font = 'bold 60px Cairo, sans-serif';
+                ctx.fillText(name, 540, 1370);
+
+                // Category & Serial
+                ctx.fillStyle = '#94A3B8';
+                ctx.font = '500 40px Cairo, sans-serif';
+                ctx.fillText(`نوع الصورة: ${category}`, 540, 1450);
+
+                ctx.fillStyle = '#F59E0B';
+                ctx.font = 'bold 45px Cairo, sans-serif';
+                ctx.fillText(`الرقم التسلسلي: ${serial}`, 540, 1530);
+
+                // Footer Note
+                ctx.fillStyle = '#CBD5E1';
+                ctx.font = 'bold 36px Cairo, sans-serif';
+                ctx.fillText('تم التسجيل وحفظ المكان في بوستر التخرج بنجاح 🎓', 540, 1800);
+
+                // Convert Canvas to Image Download
+                const link = document.createElement('a');
+                link.download = `Story_Pass_${name}.jpg`;
+                link.href = canvas.toDataURL('image/jpeg', 0.95);
+                link.click();
+            };
+        }
+
+        // Search Function
         function searchStudentBySerialOnly() {
             const rawQuery = document.getElementById('inquiryInput').value.trim();
             const resultArea = document.getElementById('searchResultArea');
@@ -867,18 +1179,14 @@
             if (!rawQuery) {
                 resultArea.innerHTML = `
                     <div class="p-4 bg-red-500/10 border border-red-500/30 rounded-xl text-center text-red-400 text-xs font-bold">
-                        <i class="fa-solid fa-triangle-exclamation ml-1"></i> حقل البحث فارغ! يرجى إدخال الرقم التسلسلي الخاص بك (مثال: #123456).
+                        <i class="fa-solid fa-triangle-exclamation ml-1"></i> حقل البحث فارغ! يرجى إدخال الرقم التسلسلي الخاص بك (مثال: 566313).
                     </div>
                 `;
                 return;
             }
 
-            let query = rawQuery.toLowerCase().replace(/\s+/g, '');
-            if (!query.startsWith('#')) {
-                query = '#' + query;
-            }
-
-            const isDigitSerial = /^#[0-9]{5,8}$/.test(query);
+            let cleanQuery = rawQuery.replace(/#/g, '').trim();
+            const isDigitSerial = /^[0-9]{5,8}$/.test(cleanQuery);
 
             if (!isDigitSerial) {
                 resultArea.innerHTML = `
@@ -886,7 +1194,7 @@
                         <i class="fa-solid fa-shield-halved text-amber-400 text-3xl"></i>
                         <p class="text-xs font-bold text-amber-300">البحث بالاسم ملغى نهائياً لحماية الخصوصية!</p>
                         <p class="text-[11px] text-slate-300 leading-relaxed">
-                            تأكد من إدخال **الرقم التسلسلي** المكون من أرقام فقط والذي ظهر لك بعد التسجيل (مثال: <span class="font-mono text-amber-300">#849201</span>).
+                            تأكد من إدخال **الرقم التسلسلي** المكون من أرقام فقط والذي ظهر لك بعد التسجيل (مثال: <span class="font-mono text-amber-300">566313</span>).
                         </p>
                     </div>
                 `;
@@ -894,11 +1202,16 @@
             }
 
             const list = window.cloudStudents || [];
-            const found = list.find(s => s.serial && s.serial.toLowerCase().trim() === query);
+            const found = list.find(s => {
+                if (!s.serial) return false;
+                const cleanStored = s.serial.toString().replace(/#/g, '').trim();
+                return cleanStored === cleanQuery;
+            });
 
             if (found) {
                 let statusBadge = '';
                 let statusMessage = '';
+                let displaySerial = found.serial.toString().replace(/#/g, '').trim();
 
                 if (found.status === 'APPROVED') {
                     statusBadge = `<span class="text-xs bg-emerald-500/20 text-emerald-400 font-bold px-3 py-1 rounded-full border border-emerald-500/30"><i class="fa-solid fa-circle-check ml-1"></i> تم القبول والاعتماد الرسمي ✅</span>`;
@@ -920,7 +1233,7 @@
                     <div class="bg-slate-900/90 border border-slate-700/80 rounded-2xl p-4 text-right space-y-3 shadow-xl">
                         <div class="flex justify-between items-center border-b border-slate-800 pb-2.5">
                             <div>${statusBadge}</div>
-                            <span class="text-xs font-mono font-bold bg-slate-800 px-2.5 py-1 rounded text-amber-300">${found.serial}</span>
+                            <span class="text-xs font-mono font-bold bg-slate-800 px-2.5 py-1 rounded text-amber-300">${displaySerial}</span>
                         </div>
                         <div class="flex items-center gap-3">
                             <img src="${found.image}" class="w-14 h-14 rounded-xl object-cover border border-amber-500 shadow">
@@ -937,7 +1250,7 @@
                     <div class="bg-slate-900/90 border border-red-500/30 rounded-2xl p-4 text-center space-y-3">
                         <i class="fa-solid fa-key text-red-400 text-3xl"></i>
                         <p class="text-xs font-bold text-slate-200">الرقم التسلسلي غير صحيح أو لم يُسجل بعد!</p>
-                        <p class="text-[11px] text-slate-400">تأكد من كتابة الرمز بدقة مع العلامة (#). إذا نسيت رقمك، تواصل مع الدعم الفني.</p>
+                        <p class="text-[11px] text-slate-400">تأكد من كتابة الرقم بالأرقام فقط. إذا نسيت رقمك، تواصل مع الدعم الفني.</p>
                         <a href="https://t.me/li_b11" target="_blank" class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs transition shadow">
                             <i class="fa-brands fa-telegram"></i> مراسلة مسؤول الدعم (@li_b11)
                         </a>
@@ -963,7 +1276,7 @@
 
         function verifyAdminPassword() {
             const inputPin = document.getElementById('adminPasswordInput').value.trim();
-            const activePin = window.ADMIN_PIN; // الرمز الثابت 112110
+            const activePin = window.ADMIN_PIN; // 112110
             
             if (inputPin === activePin) {
                 window.isAdminLoggedIn = true;
@@ -974,6 +1287,8 @@
                 
                 document.getElementById('navAdminBtnText').textContent = 'العودة لموقع الطلاب';
                 renderAdminTable();
+                renderPosterGridMockup();
+                renderQuotesList();
             } else {
                 showCustomModal('رمز خاطئ', 'رمز المرور غير صحيح. حاول مرة أخرى.', 'error');
             }
@@ -987,7 +1302,37 @@
             checkExistingRegistration();
         }
 
-        // Render Admin Table
+        // Admin Sub-Tabs Navigation
+        function switchAdminSubTab(subTab) {
+            const tabTable = document.getElementById('adminSubTabTable');
+            const tabMockup = document.getElementById('adminSubTabMockup');
+            const tabQuotes = document.getElementById('adminSubTabQuotes');
+
+            const btnTable = document.getElementById('adminSubTabTableBtn');
+            const btnMockup = document.getElementById('adminSubTabMockupBtn');
+            const btnQuotes = document.getElementById('adminSubTabQuotesBtn');
+
+            tabTable.classList.add('hidden');
+            tabMockup.classList.add('hidden');
+            tabQuotes.classList.add('hidden');
+
+            btnTable.className = "w-1/3 py-2.5 rounded-xl text-slate-400 hover:text-white transition";
+            btnMockup.className = "w-1/3 py-2.5 rounded-xl text-slate-400 hover:text-white transition";
+            btnQuotes.className = "w-1/3 py-2.5 rounded-xl text-slate-400 hover:text-white transition";
+
+            if (subTab === 'table') {
+                tabTable.classList.remove('hidden');
+                btnTable.className = "w-1/3 py-2.5 rounded-xl bg-amber-500 text-slate-950 font-black transition";
+            } else if (subTab === 'mockup') {
+                tabMockup.classList.remove('hidden');
+                btnMockup.className = "w-1/3 py-2.5 rounded-xl bg-amber-500 text-slate-950 font-black transition";
+            } else if (subTab === 'quotes') {
+                tabQuotes.classList.remove('hidden');
+                btnQuotes.className = "w-1/3 py-2.5 rounded-xl bg-amber-500 text-slate-950 font-black transition";
+            }
+        }
+
+        // Render Admin Main Table
         window.renderAdminTable = function() {
             const tbody = document.getElementById('studentsTableBody');
             const emptyState = document.getElementById('emptyState');
@@ -1005,7 +1350,7 @@
 
             const filtered = list.filter(s => {
                 const name = s.name || '';
-                const serial = s.serial || '';
+                const serial = (s.serial || '').toString().replace(/#/g, '');
                 const matchesSearch = name.toLowerCase().includes(searchVal) || serial.toLowerCase().includes(searchVal);
                 
                 let matchesFilter = true;
@@ -1034,6 +1379,8 @@
                     statusBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-red-500/20 text-red-400 border border-red-500/30">مرفوض ❌</span>`;
                 }
 
+                const displaySerial = (student.serial || '000000').toString().replace(/#/g, '');
+
                 tr.innerHTML = `
                     <td class="p-3.5 font-bold text-slate-500">${index + 1}</td>
                     <td class="p-3.5">
@@ -1041,14 +1388,14 @@
                     </td>
                     <td class="p-3.5 font-bold text-white">${student.name}</td>
                     <td class="p-3.5 text-xs text-slate-300">${student.type || 'صورة عامة'}</td>
-                    <td class="p-3.5 font-mono text-amber-300 text-xs">${student.serial}</td>
+                    <td class="p-3.5 font-mono text-amber-300 text-xs">${displaySerial}</td>
                     <td class="p-3.5">${statusBadge}</td>
                     <td class="p-3.5 text-center">
                         <div class="flex items-center justify-center gap-1.5">
                             <button onclick="approveStudentAdmin('${student.id}')" title="موافقة" class="px-2 py-1 bg-emerald-600/30 hover:bg-emerald-600 text-emerald-300 hover:text-white border border-emerald-500/40 rounded-lg text-xs font-bold transition">
                                 موافقة ✅
                             </button>
-                            <button onclick="rejectStudentAdmin('${student.id}')" title="رفض" class="px-2 py-1 bg-red-600/30 hover:bg-red-600 text-red-300 hover:text-white border border-red-500/40 rounded-lg text-xs font-bold transition">
+                            <button onclick="openRejectModal('${student.id}')" title="رفض" class="px-2 py-1 bg-red-600/30 hover:bg-red-600 text-red-300 hover:text-white border border-red-500/40 rounded-lg text-xs font-bold transition">
                                 رفض ❌
                             </button>
                         </div>
@@ -1068,21 +1415,126 @@
             });
         };
 
-        // Approval & Rejection Actions
+        // Render Poster Grid Mockup View
+        window.renderPosterGridMockup = function() {
+            const container = document.getElementById('posterGridContainer');
+            const mockupBadge = document.getElementById('mockupCountBadge');
+            container.innerHTML = '';
+
+            const list = (window.cloudStudents || []).filter(s => s.status === 'APPROVED');
+            mockupBadge.textContent = `${list.length} صورة معتمدة`;
+
+            if (list.length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-full p-8 text-center text-slate-500 space-y-2">
+                        <i class="fa-solid fa-images text-3xl block text-slate-600"></i>
+                        <p class="text-xs font-semibold">لا توجد صور مقبولة بعد للظهور على شبكة البوستر المبدئية</p>
+                    </div>
+                `;
+                return;
+            }
+
+            list.forEach(student => {
+                const card = document.createElement('div');
+                card.className = "bg-slate-900/90 border border-amber-500/30 rounded-xl p-2 text-center space-y-1.5 shadow hover:scale-105 transition-transform";
+                const displaySerial = (student.serial || '000000').toString().replace(/#/g, '');
+
+                card.innerHTML = `
+                    <div class="w-full h-28 rounded-lg overflow-hidden border border-amber-500/40 bg-slate-950">
+                        <img src="${student.image}" class="w-full h-full object-cover">
+                    </div>
+                    <p class="text-xs font-bold text-white truncate px-1">${student.name}</p>
+                    <span class="text-[10px] font-mono text-amber-300 block">${displaySerial}</span>
+                `;
+                container.appendChild(card);
+            });
+        };
+
+        // Render Quotes List
+        window.renderQuotesList = function() {
+            const container = document.getElementById('quotesListContainer');
+            container.innerHTML = '';
+
+            const list = (window.cloudStudents || []).filter(s => s.note && s.note.trim() !== '' && s.note !== 'لا توجد ملاحظة');
+
+            if (list.length === 0) {
+                container.innerHTML = `
+                    <div class="p-8 text-center text-slate-500 space-y-2">
+                        <i class="fa-solid fa-comment-slash text-3xl block text-slate-600"></i>
+                        <p class="text-xs font-semibold">لم يُدخل الطلاب أي إهداءات أو عبارات بعد</p>
+                    </div>
+                `;
+                return;
+            }
+
+            list.forEach((student, idx) => {
+                const item = document.createElement('div');
+                item.className = "p-3 bg-slate-900/90 border border-slate-800 rounded-xl flex justify-between items-center text-xs";
+                item.innerHTML = `
+                    <div class="space-y-1 text-right">
+                        <span class="font-bold text-amber-300">${idx + 1}. ${student.name}:</span>
+                        <p class="text-slate-200 italic font-semibold">"${student.note}"</p>
+                    </div>
+                    <span class="text-[10px] font-mono text-slate-500 bg-slate-800 px-2 py-1 rounded">${student.date}</span>
+                `;
+                container.appendChild(item);
+            });
+        };
+
+        function copyAllQuotesToClipboard() {
+            const list = (window.cloudStudents || []).filter(s => s.note && s.note.trim() !== '' && s.note !== 'لا توجد ملاحظة');
+            if (list.length === 0) {
+                showCustomModal('تنبيه', 'لا توجد عبارات لنسخها حالياً.', 'warning');
+                return;
+            }
+
+            let fullText = "📜 سجل إهداءات وعبارات طلاب دفعة To Be Not To Be (2027):\n\n";
+            list.forEach((s, idx) => {
+                fullText += `${idx + 1}. ${s.name}:\n"${s.note}"\n\n`;
+            });
+
+            const textarea = document.createElement('textarea');
+            textarea.value = fullText;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+
+            showCustomModal('تم النسخ', 'تم نسخ كافة إهداءات وعبارات الطلاب إلى الحافظة بنجاح! 📋', 'info');
+        }
+
+        // Quick Rejection Modal Manager
+        function openRejectModal(docId) {
+            pendingRejectDocId = docId;
+            document.getElementById('customRejectReasonInput').value = '';
+            document.getElementById('rejectModal').classList.remove('hidden');
+        }
+
+        function closeRejectModal() {
+            document.getElementById('rejectModal').classList.add('hidden');
+            pendingRejectDocId = null;
+        }
+
+        function selectQuickRejectReason(reason) {
+            document.getElementById('customRejectReasonInput').value = reason;
+        }
+
+        async function confirmRejectReason() {
+            if (!pendingRejectDocId) return;
+            const reason = document.getElementById('customRejectReasonInput').value.trim() || "الصورة غير واضحة أو مخالفة للتعليمات";
+            
+            await window.updateStudentStatusInCloud(pendingRejectDocId, 'REJECTED', reason);
+            closeRejectModal();
+            showCustomModal('تم الرفض', 'تم رفض الطلب وتحديث السبب ليظهر للطالب عند الاستعلام.', 'warning');
+        }
+
+        // Approval Action
         window.approveStudentAdmin = async function(docId) {
             await window.updateStudentStatusInCloud(docId, 'APPROVED');
             showCustomModal('تمت الموافقة', 'تمت الموافقة على الطلب واعتُمدت صورة الطالب رسمياً!', 'info');
         };
 
-        window.rejectStudentAdmin = async function(docId) {
-            const reason = prompt("اكتب سبب الرفض ليظهر للطالب عند الاستعلام (اختياري):", "الصورة غير واضحة أو مخالفة للتعليمات");
-            if (reason !== null) {
-                await window.updateStudentStatusInCloud(docId, 'REJECTED', reason);
-                showCustomModal('تم الرفض', 'تم تعديل حالة الطلب إلى مرفوض وتحديد السبب.', 'warning');
-            }
-        };
-
-        // High Quality & Professionally Styled Excel Export (2027)
+        // Fully Styled Colored Excel Export
         window.exportToExcel = function() {
             const list = window.cloudStudents || [];
             if (list.length === 0) {
@@ -1090,7 +1542,9 @@
                 return;
             }
 
-            const formattedData = [
+            const wb = XLSX.utils.book_new();
+
+            const data = [
                 ["سجل طلاب بوستر التخرج الرسمي - كلية مزايا الجامعة (قسم B - دفعة To Be Not To Be 2027)"],
                 ["تاريخ استخراج التقرير: " + new Date().toLocaleDateString('ar-IQ')],
                 [""],
@@ -1102,51 +1556,227 @@
                 if (s.status === 'APPROVED') statusText = 'مقبول ومعتمد ✅';
                 if (s.status === 'REJECTED') statusText = 'مرفوض ❌';
 
-                formattedData.push([
+                const cleanSerial = (s.serial || '000000').toString().replace(/#/g, '');
+
+                data.push([
                     idx + 1,
                     s.name || 'غير محدد',
                     s.type || 'عامة',
-                    s.serial || '#000000',
+                    cleanSerial,
                     statusText,
                     s.date || '---',
                     s.note || 'لا يوجد'
                 ]);
             });
 
-            const worksheet = XLSX.utils.aoa_to_sheet(formattedData);
-            
-            if (!worksheet['!views']) worksheet['!views'] = [];
-            worksheet['!views'].push({ RTL: true });
+            const ws = XLSX.utils.aoa_to_sheet(data);
 
-            worksheet['!merges'] = [
+            ws['!views'] = [{ RTL: true }];
+
+            ws['!cols'] = [
+                { wch: 8 },  // #
+                { wch: 35 }, // Name
+                { wch: 22 }, // Type
+                { wch: 22 }, // Serial
+                { wch: 24 }, // Status
+                { wch: 30 }, // Date
+                { wch: 35 }  // Note
+            ];
+
+            ws['!merges'] = [
                 { s: { r: 0, c: 0 }, e: { r: 0, c: 6 } },
                 { s: { r: 1, c: 0 }, e: { r: 1, c: 6 } }
             ];
 
-            worksheet['!cols'] = [
-                { wch: 6 },
-                { wch: 34 },
-                { wch: 22 },
-                { wch: 22 },
-                { wch: 20 },
-                { wch: 28 },
-                { wch: 35 }
-            ];
+            // Styles Definitions
+            const titleStyle = {
+                font: { name: "Cairo", sz: 15, bold: true, color: { rgb: "FFFFFF" } },
+                fill: { fgColor: { rgb: "1E1B4B" } },
+                alignment: { horizontal: "center", vertical: "center" }
+            };
 
-            const workbook = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(workbook, worksheet, "السجل الرسمي للدفعة 2027");
+            const subtitleStyle = {
+                font: { name: "Cairo", sz: 11, bold: true, color: { rgb: "334155" } },
+                fill: { fgColor: { rgb: "F1F5F9" } },
+                alignment: { horizontal: "center", vertical: "center" }
+            };
 
-            XLSX.writeFile(workbook, `سجل_طلاب_كلية_مزايا_قسم_B_دفعة_2027.xlsx`);
+            const headerStyle = {
+                font: { name: "Cairo", sz: 12, bold: true, color: { rgb: "0F172A" } },
+                fill: { fgColor: { rgb: "D4AF37" } },
+                alignment: { horizontal: "center", vertical: "center" },
+                border: {
+                    top: { style: "thin", color: { rgb: "9A7B1C" } },
+                    bottom: { style: "medium", color: { rgb: "9A7B1C" } },
+                    left: { style: "thin", color: { rgb: "9A7B1C" } },
+                    right: { style: "thin", color: { rgb: "9A7B1C" } }
+                }
+            };
+
+            const rowStyleEven = {
+                font: { name: "Cairo", sz: 11 },
+                fill: { fgColor: { rgb: "FFFFFF" } },
+                alignment: { horizontal: "center", vertical: "center" },
+                border: {
+                    top: { style: "thin", color: { rgb: "CBD5E1" } },
+                    bottom: { style: "thin", color: { rgb: "CBD5E1" } },
+                    left: { style: "thin", color: { rgb: "CBD5E1" } },
+                    right: { style: "thin", color: { rgb: "CBD5E1" } }
+                }
+            };
+
+            const rowStyleOdd = {
+                font: { name: "Cairo", sz: 11 },
+                fill: { fgColor: { rgb: "F8FAFC" } },
+                alignment: { horizontal: "center", vertical: "center" },
+                border: {
+                    top: { style: "thin", color: { rgb: "CBD5E1" } },
+                    bottom: { style: "thin", color: { rgb: "CBD5E1" } },
+                    left: { style: "thin", color: { rgb: "CBD5E1" } },
+                    right: { style: "thin", color: { rgb: "CBD5E1" } }
+                }
+            };
+
+            const range = XLSX.utils.decode_range(ws['!ref']);
+            for (let R = range.s.r; R <= range.e.r; ++R) {
+                for (let C = range.s.c; C <= range.e.c; ++C) {
+                    const cell_address = XLSX.utils.encode_cell({ r: R, c: C });
+                    if (!ws[cell_address]) continue;
+
+                    if (R === 0) {
+                        ws[cell_address].s = titleStyle;
+                    } else if (R === 1) {
+                        ws[cell_address].s = subtitleStyle;
+                    } else if (R === 3) {
+                        ws[cell_address].s = headerStyle;
+                    } else if (R > 3) {
+                        let baseStyle = (R % 2 === 0) ? rowStyleEven : rowStyleOdd;
+                        let cellStyle = JSON.parse(JSON.stringify(baseStyle));
+
+                        if (C === 3) {
+                            cellStyle.font.bold = true;
+                            cellStyle.font.color = { rgb: "B45309" };
+                        } else if (C === 4) {
+                            cellStyle.font.bold = true;
+                            const val = ws[cell_address].v || '';
+                            if (val.includes('مقبول')) {
+                                cellStyle.font.color = { rgb: "047857" };
+                                cellStyle.fill = { fgColor: { rgb: "D1FAE5" } };
+                            } else if (val.includes('مرفوض')) {
+                                cellStyle.font.color = { rgb: "B91C1C" };
+                                cellStyle.fill = { fgColor: { rgb: "FEE2E2" } };
+                            } else {
+                                cellStyle.font.color = { rgb: "B45309" };
+                                cellStyle.fill = { fgColor: { rgb: "FEF3C7" } };
+                            }
+                        }
+                        ws[cell_address].s = cellStyle;
+                    }
+                }
+            }
+
+            XLSX.utils.book_append_sheet(wb, ws, "السجل الرسمي 2027");
+            XLSX.writeFile(wb, `سجل_طلاب_كلية_مزايا_قسم_B_دفعة_2027.xlsx`);
         };
 
-        // Perfect Edge-To-Edge Printable PDF Export Fix (2027)
+        // Export Bulk Combined PDF for All Approved Students
+        window.exportBulkApprovedPDF = function() {
+            const list = (window.cloudStudents || []).filter(s => s.status === 'APPROVED');
+            if (list.length === 0) {
+                showCustomModal('تنبيه', 'لا يوجد طلاب مقبولون لتصدير استماراتهم.', 'warning');
+                return;
+            }
+
+            const container = document.getElementById('bulkPdfContainer');
+            container.innerHTML = '';
+
+            list.forEach((student, index) => {
+                const cleanSerial = (student.serial || '000000').toString().replace(/#/g, '');
+                const card = document.createElement('div');
+                card.style.cssText = "width: 1122px; height: 793px; padding: 40px; background: #ffffff; color: #0f172a; font-family: 'Cairo', sans-serif; direction: rtl; box-sizing: border-box; border: 10px solid #D4AF37; display: flex; flex-direction: column; justify-content: space-between; page-break-after: always;";
+
+                card.innerHTML = `
+                    <div class="flex justify-between items-center border-b-2 border-slate-300 pb-4">
+                        <div>
+                            <h1 class="text-3xl font-black text-slate-900">كلية مزايا الجامعة</h1>
+                            <p class="text-base font-bold text-amber-600 mt-1">قسم B &bull; دفعة To Be Not To Be 2027</p>
+                            <p class="text-xs text-slate-500 mt-0.5">استمارة توثيق صورة البوستر الرسمية المعتمدة (${index + 1} من ${list.length})</p>
+                        </div>
+                        <div class="text-left">
+                            <span class="bg-amber-100 text-amber-900 text-xs font-black px-4 py-2 rounded-xl border border-amber-400 shadow-sm">
+                                وثيقة تخرج معتمدة ✅
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-12 gap-8 items-center my-auto">
+                        <div class="col-span-5 text-center">
+                            <div class="w-64 h-80 mx-auto rounded-2xl border-4 border-amber-500 p-1.5 bg-slate-50 shadow-xl flex items-center justify-center overflow-hidden">
+                                <img src="${student.image}" class="w-full h-full object-cover rounded-xl">
+                            </div>
+                        </div>
+
+                        <div class="col-span-7 space-y-4 text-slate-800">
+                            <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 shadow-sm">
+                                <span class="text-xs text-slate-500 font-bold block mb-1">الاسم الثلاثي واللقب:</span>
+                                <span class="text-2xl font-black text-slate-900">${student.name}</span>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">
+                                    <span class="text-xs text-slate-500 font-bold block mb-1">نوع الصورة:</span>
+                                    <span class="text-base font-bold text-slate-800">${student.type || 'عامة'}</span>
+                                </div>
+                                <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">
+                                    <span class="text-xs text-slate-500 font-bold block mb-1">الرقم التسلسلي الخفي:</span>
+                                    <span class="text-base font-mono font-bold text-amber-600">${cleanSerial}</span>
+                                </div>
+                            </div>
+
+                            <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">
+                                <span class="text-xs text-slate-500 font-bold block mb-1">الملاحظة / الإهداء:</span>
+                                <span class="text-xs font-bold text-slate-700">${student.note || 'لا توجد ملاحظة'}</span>
+                            </div>
+
+                            <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">
+                                <span class="text-xs text-slate-500 font-bold block mb-1">تاريخ التسجيل والرفع:</span>
+                                <span class="text-xs font-mono font-bold text-slate-600">${student.date || '---'}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pt-4 border-t-2 border-slate-300 flex justify-between items-center">
+                        <div class="text-xs text-slate-600 space-y-1">
+                            <p class="font-bold"><i class="fa-solid fa-shield-halved text-amber-500 ml-1"></i> رمز التحقق الآلي والتأكيد الإلكتروني للدفعة</p>
+                            <p class="text-[11px] text-slate-500">حقوق الطبع والتوثيق محفوظة &copy; كلية مزايا الجامعة 2027</p>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+
+            setTimeout(() => {
+                const opt = {
+                    margin:       0,
+                    filename:     `جميع_استمارات_طلاب_البوستر_المقبولين_2027.pdf`,
+                    image:        { type: 'jpeg', quality: 0.98 },
+                    html2canvas:  { scale: 1.5, useCORS: true, logging: false },
+                    jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' }
+                };
+                html2pdf().set(opt).from(container).save();
+            }, 400);
+        };
+
+        // Single PDF Export
         window.downloadStudentPDF = function(docId) {
             const student = window.cloudStudents.find(s => s.id === docId);
             if (!student) return;
 
+            const cleanSerial = (student.serial || '000000').toString().replace(/#/g, '');
+
             document.getElementById('pdfStudentName').textContent = student.name;
             document.getElementById('pdfPhotoType').textContent = student.type;
-            document.getElementById('pdfSerial').textContent = student.serial;
+            document.getElementById('pdfSerial').textContent = cleanSerial;
             document.getElementById('pdfDate').textContent = student.date;
             document.getElementById('pdfNote').textContent = student.note || 'لا توجد ملاحظة مدخلة';
             document.getElementById('pdfStudentImage').src = student.image;
@@ -1154,9 +1784,9 @@
             const qrContainer = document.getElementById('pdfQrCode');
             qrContainer.innerHTML = '';
             new QRCode(qrContainer, {
-                text: `MAZAYA-B-2027|${student.serial}|${student.name}`,
-                width: 80,
-                height: 80,
+                text: `MAZAYA-B-2027|${cleanSerial}|${student.name}`,
+                width: 85,
+                height: 85,
                 colorDark: "#1e293b",
                 colorLight: "#ffffff",
                 correctLevel: QRCode.CorrectLevel.H
@@ -1167,9 +1797,19 @@
                 const opt = {
                     margin:       0,
                     filename:     `استمارة_طالب_${student.name.replace(/\s+/g, '_')}.pdf`,
-                    image:        { type: 'jpeg', quality: 0.98 },
-                    html2canvas:  { scale: 2, useCORS: true, logging: false },
-                    jsPDF:        { unit: 'px', format: [1000, 670], orientation: 'landscape' }
+                    image:        { type: 'jpeg', quality: 1.0 },
+                    html2canvas:  { 
+                        scale: 2, 
+                        useCORS: true, 
+                        logging: false,
+                        width: 1122,
+                        height: 793,
+                        windowWidth: 1122,
+                        windowHeight: 793,
+                        scrollX: 0,
+                        scrollY: 0
+                    },
+                    jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' }
                 };
                 html2pdf().set(opt).from(element).save();
             }, 350);

@@ -2,1049 +2,521 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>الملاحة الذكية | Iraqi Real-Time GPS</title>
-
-    <!-- Leaflet & FontAwesome -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css" />
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>بوستر التخرج - كلية مزايا الجامعة | To Be Not To Be</title>
+    <!-- Google Fonts & Font Awesome & Canvas Confetti -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        gold: '#D4AF37',
+                        goldHover: '#AA820A',
+                        darkBg: '#0b0f19',
+                    },
+                    fontFamily: {
+                        cairo: ['Cairo', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
     <style>
-        :root {
-            --primary: #10b981;
-            --accent: #38bdf8;
-            --danger: #ef4444;
-            --warning: #f59e0b;
-            --bg-glass: rgba(15, 23, 42, 0.92);
-            --border: rgba(255, 255, 255, 0.12);
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            -webkit-tap-highlight-color: transparent;
-        }
-
         body {
-            height: 100vh;
-            width: 100vw;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            background: #0b0f19;
-            color: #fff;
+            font-family: 'Cairo', sans-serif;
+            background: radial-gradient(circle at top, #1e1b4b 0%, #0b0f19 80%);
+            min-height: 100vh;
+            color: #f8fafc;
         }
-
-        #map {
-            flex: 1;
-            width: 100%;
-            height: 100%;
-            z-index: 1;
-        }
-
-        /* شاشة التوجيه الفعلي أثناء القيادة (HUD) */
-        .turn-banner {
-            position: absolute;
-            top: 15px;
-            left: 15px;
-            right: 15px;
-            background: #065f46;
-            border: 2px solid #10b981;
-            border-radius: 20px;
-            padding: 14px 18px;
-            z-index: 1200;
-            display: none;
-            align-items: center;
-            gap: 16px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.7);
-            animation: slideDown 0.3s ease;
-        }
-
-        .turn-banner .maneuver-icon {
-            font-size: 2.4rem;
-            color: #fff;
-            min-width: 45px;
-            text-align: center;
-        }
-
-        .turn-banner .maneuver-details h3 {
-            font-size: 1.15rem;
-            font-weight: 700;
-            color: #fff;
-        }
-
-        .turn-banner .maneuver-details p {
-            font-size: 0.85rem;
-            color: #a7f3d0;
-            margin-top: 2px;
-        }
-
-        /* واجهة تخطيط الرحلة */
-        .planner-card {
-            position: absolute;
-            top: 15px;
-            left: 15px;
-            right: 15px;
-            background: var(--bg-glass);
+        .glass-card {
+            background: rgba(17, 24, 39, 0.85);
             backdrop-filter: blur(20px);
-            border: 1px solid var(--border);
-            border-radius: 22px;
-            padding: 14px;
-            z-index: 1000;
-            box-shadow: 0 10px 35px rgba(0,0,0,0.6);
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(212, 175, 55, 0.3);
         }
-
-        .location-field {
-            display: flex;
-            align-items: center;
-            background: rgba(30, 41, 59, 0.7);
-            border: 1px solid var(--border);
-            border-radius: 14px;
-            padding: 8px 12px;
-            gap: 10px;
+        .gold-gradient-text {
+            background: linear-gradient(135deg, #FFF5C0 0%, #D4AF37 50%, #9A7B1C 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
-
-        .location-field input {
-            flex: 1;
-            background: transparent;
-            border: none;
-            color: #fff;
-            font-size: 0.9rem;
-            outline: none;
-        }
-
-        .btn-my-loc {
-            background: #1e293b;
-            color: var(--accent);
-            border: 1px solid var(--border);
-            padding: 6px 10px;
-            border-radius: 10px;
-            font-size: 0.75rem;
-            cursor: pointer;
-        }
-
-        /* نتائج البحث */
-        .search-dropdown {
-            max-height: 180px;
-            overflow-y: auto;
-            display: none;
-            background: #1e293b;
-            border-radius: 12px;
-            border: 1px solid #334155;
-        }
-
-        .search-dropdown div {
-            padding: 10px 14px;
-            font-size: 0.85rem;
-            border-bottom: 1px solid #334155;
-            cursor: pointer;
-            color: #cbd5e1;
-        }
-
-        .search-dropdown div:hover {
-            background: #334155;
-            color: var(--accent);
-        }
-
-        /* عداد السرعة واللوحة السفلية أثناء القيادة */
-        .nav-dashboard {
-            position: absolute;
-            bottom: 20px;
-            left: 15px;
-            right: 15px;
-            background: var(--bg-glass);
-            backdrop-filter: blur(20px);
-            border: 1px solid var(--border);
-            border-radius: 24px;
-            padding: 16px 20px;
-            z-index: 1100;
-            display: none;
-            flex-direction: column;
-            gap: 12px;
-            box-shadow: 0 15px 40px rgba(0,0,0,0.8);
-        }
-
-        .dashboard-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .speedometer {
-            display: flex;
-            align-items: baseline;
-            gap: 4px;
-        }
-
-        .speed-val {
-            font-size: 2.2rem;
-            font-weight: 900;
-            color: var(--accent);
-            line-height: 1;
-        }
-
-        .speed-unit {
-            font-size: 0.75rem;
-            color: #94a3b8;
-        }
-
-        .trip-stat {
-            text-align: center;
-        }
-
-        .trip-stat .stat-num {
-            font-size: 1.25rem;
-            font-weight: 800;
-            color: #fff;
-        }
-
-        .trip-stat .stat-lbl {
-            font-size: 0.75rem;
-            color: #94a3b8;
-        }
-
-        /* لوحة بدء المسار */
-        .bottom-sheet {
-            position: absolute;
-            bottom: 20px;
-            left: 15px;
-            right: 15px;
-            background: var(--bg-glass);
-            backdrop-filter: blur(20px);
-            border: 1px solid var(--border);
-            border-radius: 24px;
-            padding: 16px;
-            z-index: 1000;
-            display: none;
-            gap: 10px;
-            flex-direction: column;
-        }
-
-        .btn-action {
-            border: none;
-            border-radius: 14px;
-            padding: 13px;
-            font-size: 0.95rem;
-            font-weight: bold;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 8px;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-
-        .btn-live-gps {
-            background: linear-gradient(135deg, #10b981, #059669);
-            color: #fff;
-        }
-
-        .btn-simulation {
-            background: #1e293b;
-            color: #94a3b8;
-            border: 1px solid var(--border);
-        }
-
-        .btn-stop-nav {
-            background: var(--danger);
-            color: #fff;
-        }
-
-        .floating-btns {
-            position: absolute;
-            right: 15px;
-            bottom: 220px;
-            z-index: 999;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .fab {
-            width: 46px;
-            height: 46px;
-            border-radius: 50%;
-            background: var(--bg-glass);
-            border: 1px solid var(--border);
-            color: #fff;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.1rem;
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-        }
-
-        /* لوحة الإدارة */
-        .admin-panel {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            width: 300px;
-            background: var(--bg-glass);
-            backdrop-filter: blur(20px);
-            border: 1px solid var(--border);
-            border-radius: 22px;
-            padding: 16px;
-            z-index: 2000;
-            display: none;
-            flex-direction: column;
-            gap: 12px;
-            box-shadow: 0 10px 35px rgba(0,0,0,0.6);
-        }
-
-        .admin-panel h2 {
-            font-size: 1.2rem;
-            margin-bottom: 5px;
-            color: var(--accent);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .admin-btn {
-            background: #1e293b;
-            color: #fff;
-            border: 1px solid var(--border);
-            padding: 10px;
-            border-radius: 12px;
-            cursor: pointer;
-            text-align: right;
-            font-size: 0.9rem;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .admin-btn:hover {
-            background: #334155;
-        }
-
-        .admin-btn i {
-            width: 20px;
-            color: var(--accent);
-        }
-
-        .admin-active {
-            border-color: var(--primary) !important;
-            background: rgba(16, 185, 129, 0.1) !important;
-        }
-
-        .save-admin {
-            background: var(--primary) !important;
-            margin-top: 10px;
-        }
-
-        #admin-toggle-btn {
-            background: #334155;
-        }
-
-        .admin-badge {
-            position: absolute;
-            top: 5px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: var(--danger);
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.7rem;
-            font-weight: bold;
-            z-index: 1500;
-            display: none;
-        }
-
-        .car-cursor {
-            font-size: 2rem;
-            color: #38bdf8;
-            filter: drop-shadow(0 0 10px #0284c7);
-            transition: transform 0.3s ease;
-        }
-
-        @keyframes slideDown {
-            from { transform: translateY(-30px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
+        .gold-glow {
+            box-shadow: 0 0 30px rgba(212, 175, 55, 0.2);
         }
     </style>
 </head>
-<body>
+<body class="flex flex-col justify-between min-h-screen p-3 sm:p-6">
 
-    <!-- التوجيه الصوتي والمرئي الفعلي -->
-    <div class="turn-banner" id="turn-banner">
-        <div class="maneuver-icon" id="turn-icon"><i class="fa-solid fa-arrow-up"></i></div>
-        <div class="maneuver-details">
-            <h3 id="turn-distance">بعد 200 م</h3>
-            <p id="turn-instruction">استمر للأمام على الشارع العام</p>
+    <!-- Header Section -->
+    <header class="w-full max-w-3xl mx-auto text-center mt-2 mb-6">
+        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs sm:text-sm font-semibold mb-3">
+            <i class="fa-solid fa-graduation-cap text-gold animate-bounce"></i>
+            كلية مزايا الجامعة - قسم B
         </div>
-    </div>
+        <h1 class="text-3xl sm:text-5xl font-black tracking-tight mb-2 gold-gradient-text">
+            دفعة "To Be Not To Be"
+        </h1>
+        <p class="text-slate-300 text-xs sm:text-base font-medium">
+            منصة رفع وصنع بوستر صور التخرج الرسمية 🎓📸
+        </p>
+    </header>
 
-    <!-- بطاقة البحث وتحديد المسار -->
-    <div class="planner-card" id="planner-card">
-        <div class="location-field">
-            <i class="fa-solid fa-circle-dot" style="color: #10b981;"></i>
-            <input type="text" id="start-text" placeholder="نقطة الانطلاق (اضغط الخريطة أو حدد موقعك)" readonly>
-            <button class="btn-my-loc" onclick="useCurrentLocation()"><i class="fa-solid fa-crosshairs"></i> موقعي</button>
-        </div>
-        <div class="location-field">
-            <i class="fa-solid fa-location-dot" style="color: #ef4444;"></i>
-            <input type="text" id="dest-text" placeholder="ابحث عن وجهة، حي، شارع..." onkeyup="searchPlaces(event)">
-        </div>
-        <div class="search-dropdown" id="search-results"></div>
+    <!-- Main Container -->
+    <main class="w-full max-w-xl mx-auto my-auto">
         
-        <div style="display: flex; gap: 8px; overflow-x: auto; padding-top: 5px; scrollbar-width: none;">
-            <button class="btn-my-loc" onclick="searchNearby('hospital')"><i class="fa-solid fa-hospital"></i> مستشفيات</button>
-            <button class="btn-my-loc" onclick="searchNearby('gas_station')"><i class="fa-solid fa-gas-pump"></i> محطات وقود</button>
-            <button class="btn-my-loc" onclick="searchNearby('restaurant')"><i class="fa-solid fa-utensils"></i> مطاعم</button>
-            <button class="btn-my-loc" onclick="searchNearby('parking')"><i class="fa-solid fa-square-p"></i> مواقف</button>
+        <!-- Registration Form Card -->
+        <div id="registrationFormCard" class="glass-card gold-glow rounded-3xl p-5 sm:p-8 relative overflow-hidden transition-all duration-500">
+            
+            <div class="mb-5 border-b border-slate-700/60 pb-4 flex justify-between items-center">
+                <div>
+                    <h2 class="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-id-card text-gold"></i>
+                        استمارة صور البوستر
+                    </h2>
+                    <p class="text-xs text-slate-400 mt-0.5">سيتم الضغط والرفع بأعلى جودة وبسرعة فائقة</p>
+                </div>
+                <span class="text-xs bg-amber-500/20 text-amber-300 border border-amber-500/30 px-2.5 py-1 rounded-full font-bold">
+                    دفعة 2026
+                </span>
+            </div>
+
+            <form id="posterForm" onsubmit="handleFormSubmit(event)" class="space-y-4">
+                
+                <!-- Student Full Name -->
+                <div>
+                    <label for="studentName" class="block text-xs sm:text-sm font-bold text-slate-200 mb-1.5">
+                        الاسم الثلاثي واللقب <span class="text-amber-400">*</span>
+                    </label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 right-0 flex items-center pr-3.5 pointer-events-none text-slate-400">
+                            <i class="fa-solid fa-user"></i>
+                        </span>
+                        <input type="text" id="studentName" required autocomplete="off"
+                            placeholder="اكتب اسمك الثلاثي مع اللقب..."
+                            class="w-full pr-10 pl-4 py-3 bg-slate-900/90 border border-slate-700 focus:border-gold focus:ring-1 focus:ring-gold rounded-xl text-white placeholder-slate-500 text-sm transition-all outline-none">
+                    </div>
+                </div>
+
+                <!-- Photo Category & Note -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs sm:text-sm font-bold text-slate-200 mb-1.5">
+                            نوع الصورة <span class="text-amber-400">*</span>
+                        </label>
+                        <select id="photoType" class="w-full py-3 px-3 bg-slate-900/90 border border-slate-700 focus:border-gold rounded-xl text-white text-xs sm:text-sm outline-none">
+                            <option value="صورة صغر (طفولة)">👶 صورة صغر (طفولة)</option>
+                            <option value="صورة تخرج حديثة">🎓 صورة تخرج حديثة</option>
+                            <option value="صورة كاجوال/عامة">📸 صورة كاجوال عامة</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="studentNote" class="block text-xs sm:text-sm font-bold text-slate-200 mb-1.5">
+                            ملاحظة / كلمة للدفعة (اختياري)
+                        </label>
+                        <input type="text" id="studentNote" placeholder="عبارة تحب تنزل بالبوستر..."
+                            class="w-full py-3 px-3 bg-slate-900/90 border border-slate-700 focus:border-gold rounded-xl text-white placeholder-slate-500 text-xs sm:text-sm outline-none">
+                    </div>
+                </div>
+
+                <!-- Photo Upload Area -->
+                <div>
+                    <label class="block text-xs sm:text-sm font-bold text-slate-200 mb-1.5">
+                        رفع الصورة (تُضغط الحجوم الكبيرة تلقائياً) <span class="text-amber-400">*</span>
+                    </label>
+                    
+                    <div id="dropZone" onclick="document.getElementById('photoInput').click()" 
+                         class="border-2 border-dashed border-slate-600 hover:border-gold hover:bg-slate-800/40 rounded-2xl p-4 text-center cursor-pointer transition-all group relative bg-slate-900/50">
+                        
+                        <input type="file" id="photoInput" accept="image/*" class="hidden" onchange="processAndCompressImage(event)">
+                        
+                        <!-- Upload Placeholder UI -->
+                        <div id="uploadPlaceholder" class="space-y-2 py-2">
+                            <div class="w-12 h-12 mx-auto rounded-full bg-amber-500/10 flex items-center justify-center text-gold text-2xl group-hover:scale-110 transition-transform">
+                                <i class="fa-solid fa-cloud-arrow-up"></i>
+                            </div>
+                            <div>
+                                <p class="text-xs sm:text-sm font-bold text-slate-200">اضغط هنا لاختيار الصورة من الموبايل</p>
+                                <p class="text-[11px] text-slate-400 mt-0.5">يدعم الصور الكبيرة جداً (1MB حتى 50MB) ويتم ضغطها فوراً</p>
+                            </div>
+                        </div>
+
+                        <!-- Image Preview UI -->
+                        <div id="previewContainer" class="hidden relative">
+                            <img id="imagePreview" src="#" alt="معاينة الصورة" class="max-h-52 mx-auto rounded-xl border-2 border-gold shadow-lg object-contain">
+                            
+                            <!-- Image Controls -->
+                            <div class="flex justify-center gap-2 mt-3" onclick="event.stopPropagation()">
+                                <button type="button" onclick="rotateImage()" class="bg-slate-800 hover:bg-slate-700 text-gold px-3 py-1.5 rounded-lg text-xs font-bold border border-slate-600">
+                                    <i class="fa-solid fa-rotate-right ml-1"></i> تدوير
+                                </button>
+                                <button type="button" onclick="removeImage(event)" class="bg-red-950/80 hover:bg-red-900 text-red-300 px-3 py-1.5 rounded-lg text-xs font-bold border border-red-800">
+                                    <i class="fa-solid fa-trash ml-1"></i> حك
+                                </button>
+                            </div>
+
+                            <p id="imageSizeInfo" class="text-[11px] text-amber-300 font-semibold mt-2">
+                                <i class="fa-solid fa-bolt"></i> تم تمكين وتجهيز الصورة بنجاح
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Progress Bar -->
+                <div id="progressBarContainer" class="hidden space-y-1.5">
+                    <div class="flex justify-between text-xs font-bold text-slate-300">
+                        <span id="progressStatusText">جاري المعالجة والرفع...</span>
+                        <span id="progressPercentage" class="text-gold">0%</span>
+                    </div>
+                    <div class="w-full bg-slate-800 h-2.5 rounded-full overflow-hidden p-0.5 border border-slate-700">
+                        <div id="progressBar" class="bg-gradient-to-r from-amber-400 to-amber-600 h-full rounded-full w-0 transition-all duration-300"></div>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" id="submitBtn" 
+                        class="w-full py-3.5 px-6 rounded-xl font-bold text-slate-950 bg-gradient-to-r from-amber-300 via-amber-400 to-amber-500 hover:from-amber-400 hover:to-amber-600 shadow-lg shadow-amber-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2 text-sm sm:text-base">
+                    <span id="btnText">إرسال الصورة إلى التلجرام</span>
+                    <i id="btnIcon" class="fa-solid fa-paper-plane"></i>
+                </button>
+            </form>
         </div>
-    </div>
 
-    <!-- لوحة الإدارة -->
-    <div id="admin-badge" class="admin-badge">وضع تعديل الخريطة نشط</div>
-    <div class="admin-panel" id="admin-panel">
-        <h2>
-            لوحة الإدارة
-            <i class="fa-solid fa-xmark" style="cursor:pointer" onclick="toggleAdminPanel()"></i>
-        </h2>
-        <button class="admin-btn" id="btn-draw-road" onclick="startDrawing('polyline', 'road')">
-            <i class="fa-solid fa-road"></i> إضافة شارع جديد / تكملة طريق
-        </button>
-        <button class="admin-btn" id="btn-draw-bridge" onclick="startDrawing('marker', 'bridge')">
-            <i class="fa-solid fa-bridge-lock"></i> جسر مغلق / غير موجود
-        </button>
-        <button class="admin-btn" id="btn-draw-info" onclick="startDrawing('marker', 'info')">
-            <i class="fa-solid fa-circle-info"></i> إضافة معلومة / اسم شارع
-        </button>
-        
-        <hr style="border: 0; border-top: 1px solid var(--border); margin: 5px 0;">
-        
-        <button class="admin-btn save-admin" onclick="saveAdminData()">
-            <i class="fa-solid fa-floppy-disk"></i> حفظ التغييرات
-        </button>
-        <button class="admin-btn" style="background:var(--danger) !important" onclick="clearAdminData()">
-            <i class="fa-solid fa-trash"></i> مسح كافة التعديلات
-        </button>
-    </div>
-
-    <!-- قائمة البلاغات -->
-    <div class="admin-panel" id="report-panel" style="top: auto; bottom: 80px; left: 80px; right: auto; width: 220px;">
-        <h2 style="font-size: 1rem;">إبلاغ عن حالة طريق</h2>
-        <button class="admin-btn" onclick="addReport('traffic', 'ازدحام مروري')">
-            <i class="fa-solid fa-car-burst" style="color:var(--warning)"></i> ازدحام شديد
-        </button>
-        <button class="admin-btn" onclick="addReport('accident', 'حادث مروري')">
-            <i class="fa-solid fa-burst" style="color:var(--danger)"></i> حادث
-        </button>
-        <button class="admin-btn" onclick="addReport('closure', 'طريق مغلق')">
-            <i class="fa-solid fa-road-barrier" style="color:var(--danger)"></i> طريق مغلق
-        </button>
-    </div>
-
-    <!-- أزرار الخريطة -->
-    <div class="floating-btns">
-        <button class="fab" id="admin-toggle-btn" onclick="toggleAdminPanel()" title="لوحة الإدارة"><i class="fa-solid fa-user-gear"></i></button>
-        <button class="fab" onclick="toggleReportMenu()" title="إبلاغ عن حالة طريق"><i class="fa-solid fa-triangle-exclamation"></i></button>
-        <button class="fab" onclick="useCurrentLocation()"><i class="fa-solid fa-location-crosshairs"></i></button>
-        <button class="fab" onclick="toggleVoice()"><i class="fa-solid fa-volume-high" id="voice-icon"></i></button>
-        <button class="fab" onclick="toggleLayer()"><i class="fa-solid fa-layer-group"></i></button>
-        <button class="fab" onclick="resetAll()"><i class="fa-solid fa-rotate-right"></i></button>
-        <button class="fab" onclick="shareLocation()" title="مشاركة الموقع"><i class="fa-solid fa-share-nodes"></i></button>
-    </div>
-
-    <!-- الخريطة -->
-    <div id="map"></div>
-
-    <!-- بطاقة تفاصيل الرحلة قبل الانطلاق -->
-    <div class="bottom-sheet" id="preview-sheet">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
+        <!-- Success Digital Ticket Card -->
+        <div id="successTicketCard" class="hidden glass-card gold-glow rounded-3xl p-6 text-center space-y-5 animate-fade-in">
+            
+            <div class="w-16 h-16 bg-emerald-500/20 border-2 border-emerald-500/50 rounded-full flex items-center justify-center text-emerald-400 text-3xl mx-auto shadow-lg">
+                <i class="fa-solid fa-circle-check"></i>
+            </div>
+            
             <div>
-                <span id="preview-time" style="font-size:1.4rem; font-weight:800; color:var(--primary);">-- د</span>
-                <span style="color:#94a3b8; font-size:0.85rem; margin-right:6px;">أسرع مسار مبلط</span>
+                <h3 class="text-xl sm:text-2xl font-black text-white">تم استلام صورتك بنجاح! 🎉</h3>
+                <p class="text-slate-300 text-xs sm:text-sm mt-1">بطاقة تأكيد التسجيل الرسمية لبوستر التخرج</p>
             </div>
-            <span id="preview-dist" style="font-size:1.1rem; font-weight:bold; color:var(--accent);">-- كم</span>
+
+            <!-- Digital Pass Ticket Design -->
+            <div class="bg-slate-900/90 border border-slate-700/80 rounded-2xl p-4 text-right relative overflow-hidden space-y-3">
+                <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+                    <div>
+                        <span class="text-[10px] text-slate-400 block">الاسم المسجل</span>
+                        <span id="ticketName" class="text-amber-300 font-bold text-sm">---</span>
+                    </div>
+                    <div class="text-left">
+                        <span class="text-[10px] text-slate-400 block">الرقم التسلسلي</span>
+                        <span id="ticketSerial" class="text-white font-mono font-bold text-xs bg-slate-800 px-2 py-0.5 rounded border border-slate-700">#000000</span>
+                    </div>
+                </div>
+
+                <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+                    <div>
+                        <span class="text-[10px] text-slate-400 block">نوع الصورة</span>
+                        <span id="ticketCategory" class="text-slate-200 text-xs font-semibold">---</span>
+                    </div>
+                    <div class="text-left">
+                        <span class="text-[10px] text-slate-400 block">تاريخ الإرسال</span>
+                        <span id="ticketDate" class="text-slate-300 text-[11px] font-mono">---</span>
+                    </div>
+                </div>
+
+                <!-- QR Code Container -->
+                <div class="flex items-center justify-between pt-1">
+                    <div class="text-xs text-slate-400 space-y-1">
+                        <p><i class="fa-solid fa-building-columns text-gold ml-1"></i> كلية مزايا الجامعة</p>
+                        <p><i class="fa-solid fa-users-rectangle text-gold ml-1"></i> جروب B - To Be Not To Be</p>
+                    </div>
+                    <div id="qrcode" class="bg-white p-1.5 rounded-lg border border-slate-300 shadow"></div>
+                </div>
+            </div>
+
+            <p class="text-xs text-amber-400/90 bg-amber-500/10 border border-amber-500/20 p-3 rounded-xl">
+                <i class="fa-solid fa-lock ml-1"></i> لقد تم حفظ التسجيل بنجاح في متصفحك. لا يمكن تكرار الإرسال مرة أخرى.
+            </p>
         </div>
-        <button class="btn-action btn-live-gps" onclick="startNavigationMode(false)">
-            <i class="fa-solid fa-location-arrow"></i> بدء الملاحة الحية (تتبع GPS الحقيقي)
-        </button>
-        <button class="btn-action btn-simulation" onclick="startNavigationMode(true)">
-            <i class="fa-solid fa-play"></i> تجربة محاكاة (Demo)
-        </button>
+
+    </main>
+
+    <!-- Custom Modal Dialog -->
+    <div id="customModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="glass-card border border-amber-500/30 rounded-2xl max-w-sm w-full p-5 text-center space-y-3 shadow-2xl">
+            <div id="modalIcon" class="w-10 h-10 rounded-full mx-auto flex items-center justify-center text-lg"></div>
+            <h4 id="modalTitle" class="text-base font-bold text-white"></h4>
+            <p id="modalMessage" class="text-slate-300 text-xs sm:text-sm leading-relaxed"></p>
+            <button onclick="closeModal()" class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-xl text-xs border border-slate-600 transition-colors">
+                موافق
+            </button>
+        </div>
     </div>
 
-    <!-- لوحة القيادة الحية أثناء الملاحة -->
-    <div class="nav-dashboard" id="nav-dashboard">
-        <div class="dashboard-row">
-            <div class="speedometer">
-                <span class="speed-val" id="live-speed">0</span>
-                <span class="speed-unit">كم/س</span>
-            </div>
-            <div class="trip-stat">
-                <div class="stat-num" id="live-rem-time">-- د</div>
-                <div class="stat-lbl">الوقت المتبقي</div>
-            </div>
-            <div class="trip-stat">
-                <div class="stat-num" id="live-rem-dist">-- كم</div>
-                <div class="stat-lbl">المسافة</div>
-            </div>
-        </div>
-        <button class="btn-action btn-stop-nav" onclick="stopNavigation()">
-            <i class="fa-solid fa-xmark"></i> إنهاء الرحلة
-        </button>
-    </div>
+    <!-- Footer -->
+    <footer class="w-full max-w-2xl mx-auto text-center mt-6 text-[11px] text-slate-500 border-t border-slate-800/80 pt-3">
+        <p>جامعة مزايا الأهلية &bull; قسم B &bull; دفعة To Be Not To Be &copy; 2026</p>
+    </footer>
 
-    <!-- Leaflet Script -->
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
-
+    <!-- JavaScript Processing & Telegram Engine -->
     <script>
-        // إعداد الخريطة
-        const defaultLocation = [31.0579, 46.2573];
-        const map = L.map('map', { zoomControl: false }).setView(defaultLocation, 13);
+        const TELEGRAM_BOT_TOKEN = '8627770155:AAFB1hRBVMtPRLcLe0TtIQtZXZpS7DLcQ8A';
+        const TELEGRAM_CHAT_ID = '909090929';
 
-        const tileLayers = {
-            dark: L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { maxZoom: 19 }),
-            satellite: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19 }),
-            osm: L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 })
-        };
-        let currentLayer = 'dark';
-        tileLayers[currentLayer].addTo(map);
+        let compressedImageBlob = null;
+        let currentRotation = 0;
+        let originalImageSrc = null;
 
-        function toggleLayer() {
-            map.removeLayer(tileLayers[currentLayer]);
-            if (currentLayer === 'dark') currentLayer = 'satellite';
-            else if (currentLayer === 'satellite') currentLayer = 'osm';
-            else currentLayer = 'dark';
-            tileLayers[currentLayer].addTo(map);
-        }
-
-        // متغيرات الملاحة والحالة
-        let startPoint = null;
-        let endPoint = null;
-        let startMarker = null;
-        let endMarker = null;
-        let userVehicleMarker = null;
-        let routePolyline = null;
-        
-        let navigationSteps = [];
-        let routeCoordinates = [];
-        let isNavigating = false;
-        let isSimulation = false;
-        let gpsWatchId = null;
-        let simTimer = null;
-        let voiceEnabled = true;
-        let lastSpokenIndex = -1;
-
-        // --- نظام الإدارة وتعديل الخريطة ---
-        let isAdminMode = false;
-        let drawnItems = new L.FeatureGroup().addTo(map);
-        let currentDrawHandler = null;
-        let customFeatures = JSON.parse(localStorage.getItem('custom_map_features')) || [];
-
-        // تحميل البيانات المحفوظة مسبقاً
-        function loadCustomFeatures() {
-            customFeatures.forEach(feat => {
-                let layer;
-                if (feat.type === 'polyline') {
-                    layer = L.polyline(feat.latlngs, { color: feat.options.color || '#f59e0b', weight: 5 });
-                } else if (feat.type === 'marker') {
-                    const icon = getCustomIcon(feat.subType);
-                    layer = L.marker(feat.latlng, { icon: icon });
-                }
-                
-                if (layer) {
-                    if (feat.name) layer.bindPopup(feat.name);
-                    drawnItems.addLayer(layer);
-                }
-            });
-        }
-        loadCustomFeatures();
-
-        function getCustomIcon(subType) {
-            let color = '#38bdf8';
-            let iconClass = 'fa-circle-info';
-            
-            if (subType === 'bridge') {
-                color = '#ef4444';
-                iconClass = 'fa-bridge-lock';
-            }
-            
-            return L.divIcon({
-                html: `<div style="color:${color}; font-size: 1.5rem; filter: drop-shadow(0 0 5px rgba(0,0,0,0.5));">
-                        <i class="fa-solid ${iconClass}"></i>
-                       </div>`,
-                className: 'custom-marker',
-                iconSize: [30, 30],
-                iconAnchor: [15, 15]
-            });
-        }
-
-        function toggleAdminPanel() {
-            isAdminMode = !isAdminMode;
-            const panel = document.getElementById('admin-panel');
-            const badge = document.getElementById('admin-badge');
-            panel.style.display = isAdminMode ? 'flex' : 'none';
-            badge.style.display = isAdminMode ? 'block' : 'none';
-            
-            if (!isAdminMode) {
-                if (currentDrawHandler) currentDrawHandler.disable();
-                document.querySelectorAll('.admin-btn').forEach(b => b.classList.remove('admin-active'));
-            }
-        }
-
-        function startDrawing(type, subType) {
-            if (currentDrawHandler) currentDrawHandler.disable();
-            document.querySelectorAll('.admin-btn').forEach(b => b.classList.remove('admin-active'));
-            
-            let handler;
-            if (type === 'polyline') {
-                handler = new L.Draw.Polyline(map, { shapeOptions: { color: '#f59e0b', weight: 5 } });
-                document.getElementById('btn-draw-road').classList.add('admin-active');
-            } else if (type === 'marker') {
-                handler = new L.Draw.Marker(map);
-                if (subType === 'bridge') document.getElementById('btn-draw-bridge').classList.add('admin-active');
-                else document.getElementById('btn-draw-info').classList.add('admin-active');
-            }
-            
-            if (handler) {
-                handler.subType = subType;
-                handler.enable();
-                currentDrawHandler = handler;
-            }
-        }
-
-        map.on(L.Draw.Event.CREATED, function (event) {
-            const layer = event.layer;
-            const type = event.layerType;
-            const subType = currentDrawHandler ? currentDrawHandler.subType : 'info';
-            
-            let name = prompt("أدخل اسماً أو وصفاً لهذا العنصر (اختياري):");
-            if (name) layer.bindPopup(name);
-            
-            if (type === 'marker') {
-                layer.setIcon(getCustomIcon(subType));
-            }
-            
-            drawnItems.addLayer(layer);
-            
-            // حفظ في المصفوفة المؤقتة
-            const featData = {
-                type: type,
-                subType: subType,
-                name: name,
-                options: layer.options
-            };
-            
-            if (type === 'polyline') {
-                featData.latlngs = layer.getLatLngs();
-            } else {
-                featData.latlng = layer.getLatLng();
-            }
-            
-            customFeatures.push(featData);
-            document.querySelectorAll('.admin-btn').forEach(b => b.classList.remove('admin-active'));
-            currentDrawHandler = null;
+        window.addEventListener('DOMContentLoaded', () => {
+            checkExistingRegistration();
         });
 
-        function saveAdminData() {
-            localStorage.setItem('custom_map_features', JSON.stringify(customFeatures));
-            alert('تم حفظ التغييرات بنجاح على جهازك');
-        }
+        function checkExistingRegistration() {
+            const isRegistered = localStorage.getItem('mazaya_poster_registered');
+            if (isRegistered === 'true') {
+                const name = localStorage.getItem('mazaya_student_name') || 'غير معروف';
+                const serial = localStorage.getItem('mazaya_student_serial') || '#100000';
+                const date = localStorage.getItem('mazaya_student_date') || new Date().toLocaleDateString('ar-IQ');
+                const category = localStorage.getItem('mazaya_student_category') || 'صورة تخرج';
 
-        function clearAdminData() {
-            if (confirm('هل أنت متأكد من مسح كافة التعديلات المضافة؟')) {
-                drawnItems.clearLayers();
-                customFeatures = [];
-                localStorage.removeItem('custom_map_features');
-            }
-        }
+                document.getElementById('registrationFormCard').classList.add('hidden');
+                document.getElementById('successTicketCard').classList.remove('hidden');
 
-        // --- ميزات إضافية ---
-        async function searchNearby(type) {
-            let center = map.getCenter();
-            if (startPoint) center = startPoint;
-            
-            const url = `https://nominatim.openstreetmap.org/search?format=json&q=${type}&lat=${center.lat}&lon=${center.lng}&bounded=1&viewbox=${center.lng-0.05},${center.lat+0.05},${center.lng+0.05},${center.lat-0.05}`;
-            
-            try {
-                const res = await fetch(url);
-                const data = await res.json();
-                if (data.length > 0) {
-                    setDestination(L.latLng(parseFloat(data[0].lat), parseFloat(data[0].lon)), data[0].display_name.split(',')[0]);
-                } else {
-                    alert('لم يتم العثور على نتائج قريبة.');
-                }
-            } catch (err) {
-                console.error(err);
-            }
-        }
+                document.getElementById('ticketName').textContent = name;
+                document.getElementById('ticketSerial').textContent = serial;
+                document.getElementById('ticketDate').textContent = date;
+                document.getElementById('ticketCategory').textContent = category;
 
-        function shareLocation() {
-            const pos = startPoint || map.getCenter();
-            const url = `https://www.google.com/maps?q=${pos.lat},${pos.lng}`;
-            if (navigator.share) {
-                navigator.share({
-                    title: 'موقعي الحالي',
-                    text: 'شاهد موقعي على الخريطة:',
-                    url: url
+                // توليد QR Code
+                document.getElementById('qrcode').innerHTML = '';
+                new QRCode(document.getElementById('qrcode'), {
+                    text: `Mazaya-B|${serial}|${name}`,
+                    width: 50,
+                    height: 50,
+                    colorDark: "#000000",
+                    colorLight: "#ffffff",
+                    correctLevel: QRCode.CorrectLevel.H
                 });
-            } else {
-                prompt('انسخ الرابط لمشاركة موقعك:', url);
             }
         }
 
-        function addReport(type, label) {
-            const latlng = startPoint || map.getCenter();
-            const report = { type, label, latlng, time: Date.now() };
-            
-            reports.push(report);
-            localStorage.setItem('map_reports', JSON.stringify(reports));
-            
-            displayReport(report);
-            toggleReportMenu();
-        }
-        
-        function displayReport(r) {
-            const icon = L.divIcon({
-                html: `<div style="color:var(--danger); font-size: 1.2rem; background: white; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 10px rgba(0,0,0,0.3);">
-                        <i class="fa-solid ${r.type === 'traffic' ? 'fa-car-burst' : r.type === 'accident' ? 'fa-burst' : 'fa-road-barrier'}"></i>
-                       </div>`,
-                className: 'report-marker',
-                iconSize: [24, 24]
-            });
-            L.marker(r.latlng, { icon: icon }).bindPopup(r.label + '<br><small>' + new Date(r.time).toLocaleString('ar-IQ') + '</small>').addTo(map);
-        }
+        // معالجة وضغط الصورة الضخمة عبر Canvas تلقائياً
+        function processAndCompressImage(event) {
+            const file = event.target.files[0];
+            if (!file) return;
 
-        function loadReports() {
-            // تنظيف البلاغات القديمة (أكثر من 4 ساعات)
-            const fourHours = 4 * 60 * 60 * 1000;
-            reports = reports.filter(r => (Date.now() - r.time) < fourHours);
-            localStorage.setItem('map_reports', JSON.stringify(reports));
-            reports.forEach(displayReport);
-        }
-        loadReports();
-
-        // النقر على الخريطة
-        map.on('click', function(e) {
-            if (isNavigating) return;
-            if (!startPoint) {
-                setStart(e.latlng);
-            } else if (!endPoint) {
-                setDestination(e.latlng);
-            } else {
-                setDestination(e.latlng);
-            }
-        });
-
-        function setStart(latlng) {
-            startPoint = latlng;
-            if (startMarker) map.removeLayer(startMarker);
-            startMarker = L.circleMarker(latlng, { radius: 8, color: '#10b981', fillColor: '#10b981', fillOpacity: 1 }).addTo(map);
-            document.getElementById('start-text').value = `نقطة الانطلاق (${latlng.lat.toFixed(4)}, ${latlng.lng.toFixed(4)})`;
-            fetchRealRoute();
-        }
-
-        function setDestination(latlng, name = null) {
-            endPoint = latlng;
-            if (endMarker) map.removeLayer(endMarker);
-            endMarker = L.marker(latlng).addTo(map);
-            document.getElementById('dest-text').value = name || `الوجهة (${latlng.lat.toFixed(4)}, ${latlng.lng.toFixed(4)})`;
-            fetchRealRoute();
-        }
-
-        // جلب مسار واقعي مع إرشادات القيادة خطوة بخطوة من OSRM
-        async function fetchRealRoute() {
-            if (!startPoint || !endPoint) return;
-
-            const url = `https://router.project-osrm.org/route/v1/driving/${startPoint.lng},${startPoint.lat};${endPoint.lng},${endPoint.lat}?overview=full&geometries=geojson&steps=true`;
-
-            try {
-                const res = await fetch(url);
-                const data = await res.json();
-                if (!data.routes || data.routes.length === 0) {
-                    alert('لم يتم العثور على طريق سالك بين النقطتين.');
-                    return;
-                }
-
-                const route = data.routes[0];
-                navigationSteps = route.legs[0].steps;
-                routeCoordinates = route.geometry.coordinates.map(c => [c[1], c[0]]);
-
-                if (routePolyline) map.removeLayer(routePolyline);
-                routePolyline = L.polyline(routeCoordinates, {
-                    color: '#38bdf8',
-                    weight: 7,
-                    opacity: 0.95,
-                    lineJoin: 'round'
-                }).addTo(map);
-
-                map.fitBounds(routePolyline.getBounds(), { padding: [50, 50] });
-
-                const distKm = (route.distance / 1000).toFixed(1);
-                const timeMin = Math.ceil(route.duration / 60);
-
-                document.getElementById('preview-dist').innerText = `${distKm} كم`;
-                document.getElementById('preview-time').innerText = `${timeMin} دقيقة`;
-                document.getElementById('preview-sheet').style.display = 'flex';
-
-            } catch (e) {
-                console.error(e);
-            }
-        }
-
-        // بدء وضع الملاحة
-        function startNavigationMode(simulation = false) {
-            isNavigating = true;
-            isSimulation = simulation;
-            lastSpokenIndex = -1;
-
-            document.getElementById('planner-card').style.display = 'none';
-            document.getElementById('preview-sheet').style.display = 'none';
-            document.getElementById('turn-banner').style.display = 'flex';
-            document.getElementById('nav-dashboard').style.display = 'flex';
-
-            const carHtml = `<i class="fa-solid fa-location-arrow car-cursor"></i>`;
-            const carIcon = L.divIcon({ html: carHtml, className: 'car-icon-container', iconSize: [30, 30], iconAnchor: [15, 15] });
-
-            if (userVehicleMarker) map.removeLayer(userVehicleMarker);
-            userVehicleMarker = L.marker(routeCoordinates[0], { icon: carIcon }).addTo(map);
-
-            speakText("بدء الملاحة، يرجى اتباع المسار المحدد");
-
-            if (simulation) {
-                runSimulationMode();
-            } else {
-                runLiveGpsMode();
-            }
-        }
-
-        // وضع الـ GPS الحقيقي (Live GPS Tracking)
-        function runLiveGpsMode() {
-            if (!navigator.geolocation) {
-                alert('المتصفح لا يدعم تحديد الموقع المباشر');
+            if (!file.type.startsWith('image/')) {
+                showModal('خطأ في نوع الملف', 'يرجى تحديد ملف صورة فقط.', 'error');
                 return;
             }
 
-            gpsWatchId = navigator.geolocation.watchPosition(
-                (pos) => {
-                    const lat = pos.coords.latitude;
-                    const lng = pos.coords.longitude;
-                    const speed = pos.coords.speed ? Math.round(pos.coords.speed * 3.6) : 0;
-                    const heading = pos.coords.heading || 0;
-
-                    const currentPos = [lat, lng];
-                    userVehicleMarker.setLatLng(currentPos);
-                    map.setView(currentPos, 18);
-
-                    // تدوير أيقونة السيارة مع حركة المقود
-                    const iconEl = document.querySelector('.car-cursor');
-                    if (iconEl) iconEl.style.transform = `rotate(${heading - 45}deg)`;
-
-                    const speedValEl = document.getElementById('live-speed');
-                    speedValEl.innerText = speed;
-                    speedValEl.style.color = speed > 100 ? 'var(--danger)' : 'var(--accent)';
-
-                    updateNavigationHUD(currentPos);
-                },
-                (err) => console.warn(err),
-                { enableHighAccuracy: true, maximumAge: 1000 }
-            );
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                originalImageSrc = e.target.result;
+                currentRotation = 0;
+                compressImageEngine(originalImageSrc);
+            };
+            reader.readAsDataURL(file);
         }
 
-        // وضع المحاكاة للتجربة السريعة (Simulation Mode)
-        function runSimulationMode() {
-            let idx = 0;
-            simTimer = setInterval(() => {
-                if (idx >= routeCoordinates.length - 1) {
-                    stopNavigation();
-                    speakText("لقد وصلت إلى وجهتك");
-                    alert('وصلت إلى الوجهة بنجاح');
-                    return;
-                }
-                idx++;
-                const curr = routeCoordinates[idx];
-                const prev = routeCoordinates[idx - 1];
+        // محرك الضغط والتحويل في متصفح الطالب
+        function compressImageEngine(imageSrc) {
+            const img = new Image();
+            img.onload = function() {
+                const canvas = document.createElement('canvas');
+                let width = img.width;
+                let height = img.height;
 
-                const angle = Math.atan2(curr[1] - prev[1], curr[0] - prev[0]) * 180 / Math.PI;
-                const iconEl = document.querySelector('.car-cursor');
-                if (iconEl) iconEl.style.transform = `rotate(${angle - 45}deg)`;
+                // إعادة الأبعاد إذا كانت هائلة لتوفير المساحة وتسريع الرفع
+                const MAX_WIDTH = 1600;
+                const MAX_HEIGHT = 1600;
 
-                userVehicleMarker.setLatLng(curr);
-                map.panTo(curr, { animate: true, duration: 0.3 });
-
-                const speed = Math.floor(Math.random() * 15) + 40;
-                const speedValEl = document.getElementById('live-speed');
-                speedValEl.innerText = speed;
-                speedValEl.style.color = speed > 100 ? 'var(--danger)' : 'var(--accent)';
-                
-                updateNavigationHUD(curr);
-            }, 700);
-        }
-
-        // تحديث إرشادات الانعطاف الحية والمسافات
-        function updateNavigationHUD(userCoords) {
-            // البحث عن أقرب خطوة توجيه
-            let minDistance = Infinity;
-            let currentStep = null;
-            let stepIndex = 0;
-
-            for (let i = 0; i < navigationSteps.length; i++) {
-                const stepLoc = [navigationSteps[i].maneuver.location[1], navigationSteps[i].maneuver.location[0]];
-                const d = map.distance(userCoords, stepLoc);
-                if (d < minDistance) {
-                    minDistance = d;
-                    currentStep = navigationSteps[i];
-                    stepIndex = i;
-                }
-            }
-
-            if (currentStep) {
-                const distMeters = Math.round(minDistance);
-                const instructionText = parseManeuver(currentStep);
-
-                document.getElementById('turn-distance').innerText = distMeters < 1000 ? `بعد ${distMeters} م` : `بعد ${(distMeters/1000).toFixed(1)} كم`;
-                document.getElementById('turn-instruction').innerText = instructionText.text;
-                document.getElementById('turn-icon').innerHTML = instructionText.icon;
-
-                // التوجيه الصوتي عند الاقتراب (أقل من 80 متر)
-                if (distMeters <= 80 && lastSpokenIndex !== stepIndex) {
-                    speakText(instructionText.speech);
-                    lastSpokenIndex = stepIndex;
-                }
-            }
-        }
-
-        // تحليل نوع الانعطاف من OSRM وتحويله لكلمات وأيقونات واضحة
-        function parseManeuver(step) {
-            const type = step.maneuver.type;
-            const modifier = step.maneuver.modifier;
-            const streetName = step.name ? `إلى ${step.name}` : 'للأمام';
-
-            let icon = '<i class="fa-solid fa-arrow-up"></i>';
-            let text = `استمر على الطريق ${streetName}`;
-            let speech = `استمر للأمام ${streetName}`;
-
-            if (modifier && modifier.includes('right')) {
-                icon = '<i class="fa-solid fa-arrow-turn-down fa-rotate-90"></i>';
-                text = `انعطف يميناً ${streetName}`;
-                speech = `انعطف يميناً ${streetName}`;
-            } else if (modifier && modifier.includes('left')) {
-                icon = '<i class="fa-solid fa-arrow-turn-down fa-rotate-270"></i>';
-                text = `انعطف يساراً ${streetName}`;
-                speech = `انعطف يساراً ${streetName}`;
-            } else if (type === 'roundabout') {
-                icon = '<i class="fa-solid fa-arrows-spin"></i>';
-                text = `ادخل الاستدارة ثم اخرج ${streetName}`;
-                speech = `ادخل الفلكة ثم اخرج ${streetName}`;
-            } else if (type === 'arrive') {
-                icon = '<i class="fa-solid fa-flag-checkered"></i>';
-                text = 'الوجهة في الأمام مباشرة';
-                speech = 'الوجهة في الأمام مباشرة';
-            }
-
-            return { icon, text, speech };
-        }
-
-        // التوجيه الصوتي العربي (Web Speech API)
-        function speakText(text) {
-            if (!voiceEnabled || !('speechSynthesis' in window)) return;
-            window.speechSynthesis.cancel();
-            const utterance = new SpeechSynthesisUtterance(text);
-            utterance.lang = 'ar-SA';
-            utterance.rate = 1.0;
-            window.speechSynthesis.speak(utterance);
-        }
-
-        function toggleVoice() {
-            voiceEnabled = !voiceEnabled;
-            document.getElementById('voice-icon').className = voiceEnabled ? 'fa-solid fa-volume-high' : 'fa-solid fa-volume-xmark';
-        }
-
-        // تحديد الموقع الحالي فوراً
-        function useCurrentLocation() {
-            navigator.geolocation.getCurrentPosition(
-                (pos) => {
-                    const coords = L.latLng(pos.coords.latitude, pos.coords.longitude);
-                    setStart(coords);
-                    map.setView(coords, 16);
-                },
-                (err) => alert('يرجى تمكين صلاحية الـ GPS في هاتفك'),
-                { enableHighAccuracy: true }
-            );
-        }
-
-        // إنهاء الرحلة
-        function stopNavigation() {
-            isNavigating = false;
-            if (gpsWatchId) navigator.geolocation.clearWatch(gpsWatchId);
-            if (simTimer) clearInterval(simTimer);
-
-            document.getElementById('planner-card').style.display = 'flex';
-            document.getElementById('turn-banner').style.display = 'none';
-            document.getElementById('nav-dashboard').style.display = 'none';
-
-            if (userVehicleMarker) map.removeLayer(userVehicleMarker);
-            if (routePolyline) map.fitBounds(routePolyline.getBounds(), { padding: [40, 40] });
-        }
-
-        // البحث عن الأماكن
-        let searchDebounce;
-        function searchPlaces(e) {
-            clearTimeout(searchDebounce);
-            const q = e.target.value;
-            const resBox = document.getElementById('search-results');
-
-            if (!q || q.length < 2) {
-                resBox.style.display = 'none';
-                return;
-            }
-
-            searchDebounce = setTimeout(async () => {
-                try {
-                    const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&countrycodes=iq&q=${encodeURIComponent(q)}`);
-                    const data = await res.json();
-                    resBox.innerHTML = '';
-
-                    if (data.length === 0) {
-                        resBox.style.display = 'none';
-                        return;
+                if (width > height) {
+                    if (width > MAX_WIDTH) {
+                        height *= MAX_WIDTH / width;
+                        width = MAX_WIDTH;
                     }
-
-                    data.slice(0, 4).forEach(item => {
-                        const div = document.createElement('div');
-                        div.innerText = item.display_name;
-                        div.onclick = () => {
-                            setDestination(L.latLng(parseFloat(item.lat), parseFloat(item.lon)), item.display_name.split(',')[0]);
-                            resBox.style.display = 'none';
-                        };
-                        resBox.appendChild(div);
-                    });
-                    resBox.style.display = 'block';
-                } catch (err) {
-                    console.warn(err);
+                } else {
+                    if (height > MAX_HEIGHT) {
+                        width *= MAX_HEIGHT / height;
+                        height = MAX_HEIGHT;
+                    }
                 }
-            }, 300);
+
+                canvas.width = width;
+                canvas.height = height;
+
+                const ctx = canvas.getContext('2d');
+                ctx.save();
+
+                // التدوير إذا طلب الطالب
+                if (currentRotation !== 0) {
+                    if (currentRotation === 90 || currentRotation === 270) {
+                        canvas.width = height;
+                        canvas.height = width;
+                    }
+                    ctx.translate(canvas.width / 2, canvas.height / 2);
+                    ctx.rotate((currentRotation * Math.PI) / 180);
+                    ctx.drawImage(img, -width / 2, -height / 2, width, height);
+                } else {
+                    ctx.drawImage(img, 0, 0, width, height);
+                }
+                ctx.restore();
+
+                // تحويل إلى JPEG بجودة 82% (تخفيض الحجم من 20MB إلى 500KB تقريباً دون فقدان الجودة)
+                canvas.toBlob((blob) => {
+                    compressedImageBlob = blob;
+                    const previewImg = document.getElementById('imagePreview');
+                    previewImg.src = URL.createObjectURL(blob);
+
+                    const sizeInMB = (blob.size / (1024 * 1024)).toFixed(2);
+                    document.getElementById('imageSizeInfo').innerHTML = `<i class="fa-solid fa-compress text-emerald-400"></i> تم ضغط الصورة وتحسين الجودة (${sizeInMB} MB)`;
+
+                    document.getElementById('uploadPlaceholder').classList.add('hidden');
+                    document.getElementById('previewContainer').classList.remove('hidden');
+                }, 'image/jpeg', 0.82);
+            };
+            img.src = imageSrc;
         }
 
-        // تصفير شامل
-        function resetAll() {
-            stopNavigation();
-            if (startMarker) map.removeLayer(startMarker);
-            if (endMarker) map.removeLayer(endMarker);
-            if (routePolyline) map.removeLayer(routePolyline);
+        // تدوير الصورة
+        function rotateImage() {
+            if (!originalImageSrc) return;
+            currentRotation = (currentRotation + 90) % 360;
+            compressImageEngine(originalImageSrc);
+        }
 
-            startPoint = null;
-            endPoint = null;
-            routeCoordinates = [];
-            navigationSteps = [];
+        // حك الصورة
+        function removeImage(event) {
+            event.stopPropagation();
+            compressedImageBlob = null;
+            originalImageSrc = null;
+            document.getElementById('photoInput').value = '';
+            document.getElementById('uploadPlaceholder').classList.remove('hidden');
+            document.getElementById('previewContainer').classList.add('hidden');
+        }
 
-            document.getElementById('start-text').value = '';
-            document.getElementById('dest-text').value = '';
-            document.getElementById('preview-sheet').style.display = 'none';
+        // إرسال البيانات بالكامل للبوت
+        function handleFormSubmit(event) {
+            event.preventDefault();
+
+            const studentName = document.getElementById('studentName').value.trim();
+            const photoType = document.getElementById('photoType').value;
+            const studentNote = document.getElementById('studentNote').value.trim() || 'لا توجد ملاحظة';
+
+            if (!studentName || studentName.length < 5) {
+                showModal('تنبيه الاسم', 'يرجى كتابة الاسم الثلاثي الكامل.', 'warning');
+                return;
+            }
+
+            if (!compressedImageBlob) {
+                showModal('تنبيه الصورة', 'يرجى إرفاق الصورة أولاً.', 'warning');
+                return;
+            }
+
+            // إظهار شريط التقدم
+            const progressBarContainer = document.getElementById('progressBarContainer');
+            const progressBar = document.getElementById('progressBar');
+            const progressPercentage = document.getElementById('progressPercentage');
+            const submitBtn = document.getElementById('submitBtn');
+
+            progressBarContainer.classList.remove('hidden');
+            submitBtn.disabled = true;
+            submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+
+            const registrationSerial = '#' + Math.floor(100000 + Math.random() * 900000);
+            const now = new Date();
+            const dateFormatted = now.toLocaleDateString('ar-IQ') + ' | ' + now.toLocaleTimeString('ar-IQ', { hour: '2-digit', minute: '2-digit' });
+
+            const captionText = 
+`🎓 *طلب صورة بوستر تخرج جديد!*
+━━━━━━━━━━━━━━━━━━
+🏛 *الكلية:* كلية مزايا الجامعة
+👥 *الجروب:* B
+✨ *الدفعة:* To Be Not To Be
+👤 *الاسم الثلاثي:* ${studentName}
+🏷 *نوع الصورة:* ${photoType}
+💬 *ملاحظة:* ${studentNote}
+🔢 *الرقم التسلسلي:* \`${registrationSerial}\`
+⏰ *تاريخ التسجيل:* ${dateFormatted}
+━━━━━━━━━━━━━━━━━━`;
+
+            const formData = new FormData();
+            formData.append('chat_id', TELEGRAM_CHAT_ID);
+            formData.append('caption', captionText);
+            formData.append('parse_mode', 'Markdown');
+            formData.append('photo', compressedImageBlob, `${studentName}.jpg`);
+
+            // استخدام XMLHttpRequest لمتابعة شريط التقدم بشكل دقيق
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendPhoto`, true);
+
+            xhr.upload.onprogress = function(e) {
+                if (e.lengthComputable) {
+                    const percentComplete = Math.round((e.loaded / e.total) * 100);
+                    progressBar.style.width = percentComplete + '%';
+                    progressPercentage.textContent = percentComplete + '%';
+                }
+            };
+
+            xhr.onload = function() {
+                if (xhr.status === 200) {
+                    // حفظ البيانات محلياً
+                    localStorage.setItem('mazaya_poster_registered', 'true');
+                    localStorage.setItem('mazaya_student_name', studentName);
+                    localStorage.setItem('mazaya_student_serial', registrationSerial);
+                    localStorage.setItem('mazaya_student_date', dateFormatted);
+                    localStorage.setItem('mazaya_student_category', photoType);
+
+                    // ألعاب نارية واحتفال عند النجاح
+                    confetti({
+                        particleCount: 100,
+                        spread: 70,
+                        origin: { y: 0.6 }
+                    });
+
+                    checkExistingRegistration();
+                } else {
+                    showModal('فشل الإرسال', 'حدثت مشكلة أثناء الرفع، تأكد من الاتصال بالإنترنت.', 'error');
+                }
+                resetSubmitButton();
+            };
+
+            xhr.onerror = function() {
+                showModal('خطأ في الاتصال', 'فشل الإرسال بسبب انقطاع الإنترنت.', 'error');
+                resetSubmitButton();
+            };
+
+            xhr.send(formData);
+        }
+
+        function resetSubmitButton() {
+            document.getElementById('progressBarContainer').classList.add('hidden');
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = false;
+            submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+        }
+
+        function showModal(title, message, type = 'info') {
+            const modal = document.getElementById('customModal');
+            document.getElementById('modalTitle').textContent = title;
+            document.getElementById('modalMessage').textContent = message;
+            const modalIcon = document.getElementById('modalIcon');
+
+            if (type === 'error') {
+                modalIcon.className = 'w-10 h-10 rounded-full mx-auto flex items-center justify-center text-lg bg-red-500/20 text-red-400 border border-red-500/30';
+                modalIcon.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i>';
+            } else if (type === 'warning') {
+                modalIcon.className = 'w-10 h-10 rounded-full mx-auto flex items-center justify-center text-lg bg-amber-500/20 text-amber-400 border border-amber-500/30';
+                modalIcon.innerHTML = '<i class="fa-solid fa-circle-exclamation"></i>';
+            } else {
+                modalIcon.className = 'w-10 h-10 rounded-full mx-auto flex items-center justify-center text-lg bg-blue-500/20 text-blue-400 border border-blue-500/30';
+                modalIcon.innerHTML = '<i class="fa-solid fa-circle-info"></i>';
+            }
+
+            modal.classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('customModal').classList.add('hidden');
         }
     </script>
 </body>

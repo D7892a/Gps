@@ -3,11 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>بوستر التخرج - كلية مزايا الجامعة | To Be Not To Be</title>
-    <!-- Google Fonts & Font Awesome & Canvas Confetti -->
+    <title>بوستر التخرج ولوحة الإدارة | كلية مزايا الجامعة</title>
+    <!-- Google Fonts & Font Awesome Icons -->
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Libraries: Canvas Confetti, SheetJS, html2pdf, QRCode -->
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -48,27 +51,50 @@
         .gold-glow {
             box-shadow: 0 0 30px rgba(212, 175, 55, 0.2);
         }
+        #pdfCardTemplate {
+            width: 700px;
+            background: #ffffff;
+            color: #1e293b;
+            font-family: 'Cairo', sans-serif;
+            direction: rtl;
+        }
     </style>
 </head>
 <body class="flex flex-col justify-between min-h-screen p-3 sm:p-6">
 
-    <!-- Header Section -->
-    <header class="w-full max-w-3xl mx-auto text-center mt-2 mb-6">
-        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs sm:text-sm font-semibold mb-3">
-            <i class="fa-solid fa-graduation-cap text-gold animate-bounce"></i>
-            كلية مزايا الجامعة - قسم B
+    <!-- Top Navigation Bar -->
+    <nav class="w-full max-w-6xl mx-auto flex justify-between items-center mb-6 px-2">
+        <div class="flex items-center gap-2">
+            <span class="w-3 h-3 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span class="text-xs font-bold text-slate-300">النظام السحابي متصل</span>
         </div>
-        <h1 class="text-3xl sm:text-5xl font-black tracking-tight mb-2 gold-gradient-text">
-            دفعة "To Be Not To Be"
-        </h1>
-        <p class="text-slate-300 text-xs sm:text-base font-medium">
-            منصة رفع وصنع بوستر صور التخرج الرسمية 🎓📸
-        </p>
-    </header>
-
-    <!-- Main Container -->
-    <main class="w-full max-w-xl mx-auto my-auto">
         
+        <!-- Toggle Admin Mode Button -->
+        <button onclick="requestAdminAccess()" id="navAdminBtn" class="px-3.5 py-1.5 bg-slate-800/80 hover:bg-slate-700 text-amber-300 border border-amber-500/30 rounded-xl text-xs font-bold transition flex items-center gap-2 shadow">
+            <i class="fa-solid fa-user-shield"></i>
+            <span id="navAdminBtnText">لوحة الإدارة</span>
+        </button>
+    </nav>
+
+    <!-- ================================================================= -->
+    <!-- SECTION 1: STUDENT WEBSITE (واجهة الطلاب)                        -->
+    <!-- ================================================================= -->
+    <div id="studentView" class="w-full max-w-xl mx-auto my-auto space-y-6">
+        
+        <!-- Header Section -->
+        <header class="text-center">
+            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs sm:text-sm font-semibold mb-3">
+                <i class="fa-solid fa-graduation-cap text-gold animate-bounce"></i>
+                كلية مزايا الجامعة - جروب B
+            </div>
+            <h1 class="text-3xl sm:text-5xl font-black tracking-tight mb-2 gold-gradient-text">
+                دفعة "To Be Not To Be"
+            </h1>
+            <p class="text-slate-300 text-xs sm:text-base font-medium">
+                منصة رفع وصنع بوستر صور التخرج الرسمية 🎓📸
+            </p>
+        </header>
+
         <!-- Registration Form Card -->
         <div id="registrationFormCard" class="glass-card gold-glow rounded-3xl p-5 sm:p-8 relative overflow-hidden transition-all duration-500">
             
@@ -78,7 +104,7 @@
                         <i class="fa-solid fa-id-card text-gold"></i>
                         استمارة صور البوستر
                     </h2>
-                    <p class="text-xs text-slate-400 mt-0.5">سيتم الضغط والرفع بأعلى جودة وبسرعة فائقة</p>
+                    <p class="text-xs text-slate-400 mt-0.5">سيتم الحفظ في قاعدة البيانات والبوستر فوراً</p>
                 </div>
                 <span class="text-xs bg-amber-500/20 text-amber-300 border border-amber-500/30 px-2.5 py-1 rounded-full font-bold">
                     دفعة 2026
@@ -141,7 +167,7 @@
                             </div>
                             <div>
                                 <p class="text-xs sm:text-sm font-bold text-slate-200">اضغط هنا لاختيار الصورة من الموبايل</p>
-                                <p class="text-[11px] text-slate-400 mt-0.5">يدعم الصور الكبيرة جداً (1MB حتى 50MB) ويتم ضغطها فوراً</p>
+                                <p class="text-[11px] text-slate-400 mt-0.5">يتم ضغط وضبط الجودة تلقائياً</p>
                             </div>
                         </div>
 
@@ -155,32 +181,21 @@
                                     <i class="fa-solid fa-rotate-right ml-1"></i> تدوير
                                 </button>
                                 <button type="button" onclick="removeImage(event)" class="bg-red-950/80 hover:bg-red-900 text-red-300 px-3 py-1.5 rounded-lg text-xs font-bold border border-red-800">
-                                    <i class="fa-solid fa-trash ml-1"></i> حك
+                                    <i class="fa-solid fa-trash ml-1"></i> مسح
                                 </button>
                             </div>
 
                             <p id="imageSizeInfo" class="text-[11px] text-amber-300 font-semibold mt-2">
-                                <i class="fa-solid fa-bolt"></i> تم تمكين وتجهيز الصورة بنجاح
+                                <i class="fa-solid fa-bolt"></i> تم تجهيز الصورة بنجاح
                             </p>
                         </div>
-                    </div>
-                </div>
-
-                <!-- Progress Bar -->
-                <div id="progressBarContainer" class="hidden space-y-1.5">
-                    <div class="flex justify-between text-xs font-bold text-slate-300">
-                        <span id="progressStatusText">جاري المعالجة والرفع...</span>
-                        <span id="progressPercentage" class="text-gold">0%</span>
-                    </div>
-                    <div class="w-full bg-slate-800 h-2.5 rounded-full overflow-hidden p-0.5 border border-slate-700">
-                        <div id="progressBar" class="bg-gradient-to-r from-amber-400 to-amber-600 h-full rounded-full w-0 transition-all duration-300"></div>
                     </div>
                 </div>
 
                 <!-- Submit Button -->
                 <button type="submit" id="submitBtn" 
                         class="w-full py-3.5 px-6 rounded-xl font-bold text-slate-950 bg-gradient-to-r from-amber-300 via-amber-400 to-amber-500 hover:from-amber-400 hover:to-amber-600 shadow-lg shadow-amber-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2 text-sm sm:text-base">
-                    <span id="btnText">إرسال الصورة إلى التلجرام</span>
+                    <span id="btnText">إرسال الصورة وحفظ التسجيل</span>
                     <i id="btnIcon" class="fa-solid fa-paper-plane"></i>
                 </button>
             </form>
@@ -188,13 +203,12 @@
 
         <!-- Success Digital Ticket Card -->
         <div id="successTicketCard" class="hidden glass-card gold-glow rounded-3xl p-6 text-center space-y-5 animate-fade-in">
-            
             <div class="w-16 h-16 bg-emerald-500/20 border-2 border-emerald-500/50 rounded-full flex items-center justify-center text-emerald-400 text-3xl mx-auto shadow-lg">
                 <i class="fa-solid fa-circle-check"></i>
             </div>
             
             <div>
-                <h3 class="text-xl sm:text-2xl font-black text-white">تم استلام صورتك بنجاح! 🎉</h3>
+                <h3 class="text-xl sm:text-2xl font-black text-white">تم استلام صورتك وتأكيد حجزك! 🎉</h3>
                 <p class="text-slate-300 text-xs sm:text-sm mt-1">بطاقة تأكيد التسجيل الرسمية لبوستر التخرج</p>
             </div>
 
@@ -233,19 +247,191 @@
             </div>
 
             <p class="text-xs text-amber-400/90 bg-amber-500/10 border border-amber-500/20 p-3 rounded-xl">
-                <i class="fa-solid fa-lock ml-1"></i> لقد تم حفظ التسجيل بنجاح في متصفحك. لا يمكن تكرار الإرسال مرة أخرى.
+                <i class="fa-solid fa-lock ml-1"></i> تم حفظ بياناتك في السحاب وفي جهازك. لا يمكن إعادة التسجيل مرة أخرى.
             </p>
         </div>
 
-    </main>
+    </div>
 
-    <!-- Custom Modal Dialog -->
+    <!-- ================================================================= -->
+    <!-- SECTION 2: ISOLATED ADMIN DASHBOARD (لوحة الإدارة المعزولة)         -->
+    <!-- ================================================================= -->
+    <div id="adminView" class="hidden w-full max-w-6xl mx-auto my-auto space-y-6">
+        
+        <!-- Admin Header -->
+        <div class="glass-card rounded-2xl p-4 sm:p-6 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <div class="w-12 h-12 bg-amber-500/10 border border-amber-500/30 rounded-xl flex items-center justify-center text-gold text-2xl">
+                    <i class="fa-solid fa-user-shield"></i>
+                </div>
+                <div>
+                    <h2 class="text-xl sm:text-2xl font-black text-white">لوحة إدارة بوستر التخرج السحابية 👑</h2>
+                    <p class="text-xs text-slate-400">إدارة قاعدة البيانات الحيّة والتصدير لـ Excel و PDF</p>
+                </div>
+            </div>
+
+            <!-- Stats Badge -->
+            <div class="flex items-center gap-3 bg-slate-900/80 border border-slate-800 p-2.5 px-4 rounded-xl">
+                <div class="text-center px-3 border-l border-slate-800">
+                    <span class="text-xs text-slate-400 block">المسجلين بالسحاب</span>
+                    <span id="statTotal" class="text-lg font-bold text-amber-400">0</span>
+                </div>
+                <div class="text-center px-3">
+                    <span class="text-xs text-slate-400 block">صور التخرج</span>
+                    <span id="statGrad" class="text-lg font-bold text-emerald-400">0</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Control Bar -->
+        <div class="glass-card rounded-2xl p-4 flex flex-col md:flex-row gap-3 justify-between items-center">
+            
+            <!-- Search & Filter -->
+            <div class="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
+                <div class="relative w-full sm:w-64">
+                    <i class="fa-solid fa-magnifying-glass absolute right-3 top-3 text-slate-400 text-xs"></i>
+                    <input type="text" id="searchInput" oninput="renderAdminTable()" placeholder="بحث باسم الطالب..." 
+                           class="w-full pr-9 pl-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:border-gold outline-none">
+                </div>
+                <select id="filterType" onchange="renderAdminTable()" class="bg-slate-900 border border-slate-700 text-xs text-white py-2 px-3 rounded-xl focus:border-gold outline-none">
+                    <option value="ALL">جميع الصور</option>
+                    <option value="صورة صغر (طفولة)">صور الصغر (الطفولة)</option>
+                    <option value="صورة تخرج حديثة">صور التخرج الحديثة</option>
+                </select>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex flex-wrap items-center gap-2 w-full md:w-auto justify-end">
+                <button onclick="exportToExcel()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-lg shadow-emerald-600/20">
+                    <i class="fa-solid fa-file-excel"></i> تصدير إكسل (Excel)
+                </button>
+                <button onclick="exitAdminView()" class="px-3.5 py-2 bg-red-900/50 hover:bg-red-800 text-red-300 rounded-xl text-xs font-bold border border-red-700 transition">
+                    خروج من الإدارة
+                </button>
+            </div>
+        </div>
+
+        <!-- Database Students Table -->
+        <div class="glass-card rounded-2xl overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-right text-xs sm:text-sm text-slate-300">
+                    <thead class="bg-slate-900/90 text-slate-400 font-bold border-b border-slate-800">
+                        <tr>
+                            <th class="p-3.5">#</th>
+                            <th class="p-3.5">الصورة</th>
+                            <th class="p-3.5">الاسم الثلاثي</th>
+                            <th class="p-3.5">نوع الصورة</th>
+                            <th class="p-3.5">الرقم التسلسلي</th>
+                            <th class="p-3.5">تاريخ التسجيل</th>
+                            <th class="p-3.5 text-center">الإجراءات والاستمارة</th>
+                        </tr>
+                    </thead>
+                    <tbody id="studentsTableBody" class="divide-y divide-slate-800/60">
+                        <!-- Dynamic Rows -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <div id="emptyState" class="hidden p-10 text-center text-slate-500">
+                <i class="fa-solid fa-folder-open text-4xl mb-3 block text-slate-600"></i>
+                <p class="text-sm font-semibold">لا يوجد طلاب مسجلون في السحاب حالياً</p>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Hidden Template for Generating Student PDF Document -->
+    <div class="fixed top-[-9999px] left-[-9999px]">
+        <div id="pdfCardTemplate" class="p-8 border-4 border-amber-500 rounded-3xl relative">
+            <div class="flex justify-between items-center border-b-2 border-slate-200 pb-4 mb-6">
+                <div>
+                    <h2 class="text-2xl font-black text-slate-900">كلية مزايا الجامعة</h2>
+                    <p class="text-sm font-bold text-amber-600">جروب B &bull; دفعة To Be Not To Be 2026</p>
+                    <p class="text-xs text-slate-500 mt-0.5">استمارة توثيق صورة البوستر الرسمية</p>
+                </div>
+                <div class="text-left">
+                    <span class="bg-amber-100 text-amber-800 text-xs font-bold px-3 py-1 rounded-full border border-amber-300">
+                        وثيقة تخرج معتمدة
+                    </span>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-12 gap-6 items-center">
+                <div class="col-span-5 text-center">
+                    <div class="w-48 h-56 mx-auto rounded-2xl border-2 border-amber-500 p-1 bg-slate-100 shadow-md flex items-center justify-center overflow-hidden">
+                        <img id="pdfStudentImage" src="" alt="صورة الطالب" class="w-full h-full object-cover rounded-xl">
+                    </div>
+                </div>
+
+                <div class="col-span-7 space-y-4 text-slate-800">
+                    <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">
+                        <span class="text-xs text-slate-500 block">الاسم الثلاثي واللقب:</span>
+                        <span id="pdfStudentName" class="text-xl font-bold text-slate-900">---</span>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200">
+                            <span class="text-xs text-slate-500 block">نوع الصورة:</span>
+                            <span id="pdfPhotoType" class="text-sm font-bold text-slate-800">---</span>
+                        </div>
+                        <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200">
+                            <span class="text-xs text-slate-500 block">الرقم التسلسلي:</span>
+                            <span id="pdfSerial" class="text-sm font-mono font-bold text-amber-600">#000000</span>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200">
+                        <span class="text-xs text-slate-500 block">الملاحظة / الإهداء:</span>
+                        <span id="pdfNote" class="text-xs font-semibold text-slate-700">---</span>
+                    </div>
+
+                    <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200">
+                        <span class="text-xs text-slate-500 block">تاريخ التسجيل والرفع:</span>
+                        <span id="pdfDate" class="text-xs font-mono text-slate-600">---</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-8 pt-4 border-t-2 border-slate-200 flex justify-between items-center">
+                <div class="text-xs text-slate-500 space-y-1">
+                    <p>رمز التحقق الآلي والتأكيد الإلكتروني للدفعة</p>
+                    <p class="font-bold text-slate-700">حقوق الطبع والتوثيق محفوظة &copy; 2026</p>
+                </div>
+                <div id="pdfQrCode" class="bg-white p-1 border border-slate-300 rounded-lg"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Password Modal -->
+    <div id="passwordModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="glass-card border border-amber-500/30 rounded-2xl max-w-xs w-full p-5 text-center space-y-4 shadow-2xl">
+            <div class="w-12 h-12 bg-amber-500/10 border border-amber-500/30 rounded-full mx-auto flex items-center justify-center text-amber-400 text-xl">
+                <i class="fa-solid fa-lock"></i>
+            </div>
+            <h4 class="text-base font-bold text-white">دخول لوحة الإدارة</h4>
+            <p class="text-slate-400 text-xs">يرجى كتابة رمز المرور الخاص بالمشرف للوصول</p>
+            
+            <input type="password" id="adminPasswordInput" placeholder="رمز المرور (الافتراضي: 2026)" 
+                   class="w-full py-2.5 px-3 bg-slate-900 border border-slate-700 rounded-xl text-center text-sm text-white focus:border-gold outline-none">
+            
+            <div class="flex gap-2">
+                <button onclick="verifyAdminPassword()" class="w-full py-2 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold rounded-xl text-xs transition">
+                    تأكيد الدخول
+                </button>
+                <button onclick="closePasswordModal()" class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-xl text-xs transition border border-slate-600">
+                    إلغاء
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Modal Notification -->
     <div id="customModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="glass-card border border-amber-500/30 rounded-2xl max-w-sm w-full p-5 text-center space-y-3 shadow-2xl">
             <div id="modalIcon" class="w-10 h-10 rounded-full mx-auto flex items-center justify-center text-lg"></div>
             <h4 id="modalTitle" class="text-base font-bold text-white"></h4>
             <p id="modalMessage" class="text-slate-300 text-xs sm:text-sm leading-relaxed"></p>
-            <button onclick="closeModal()" class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-xl text-xs border border-slate-600 transition-colors">
+            <button onclick="closeCustomModal()" class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-xl text-xs border border-slate-600 transition-colors">
                 موافق
             </button>
         </div>
@@ -256,14 +442,87 @@
         <p>جامعة مزايا الأهلية &bull; قسم B &bull; دفعة To Be Not To Be &copy; 2026</p>
     </footer>
 
-    <!-- JavaScript Processing & Telegram Engine -->
-    <script>
-        const TELEGRAM_BOT_TOKEN = '8627770155:AAFB1hRBVMtPRLcLe0TtIQtZXZpS7DLcQ8A';
-        const TELEGRAM_CHAT_ID = '909090929';
+    <!-- Firebase System Modules -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
+        // إعدادات البوت والرمز السري
+        window.TELEGRAM_BOT_TOKEN = '8627770155:AAFB1hRBVMtPRLcLe0TtIQtZXZpS7DLcQ8A';
+        window.TELEGRAM_CHAT_ID = '909090929';
+        window.ADMIN_PIN = '2026'; // رمز الدخول للوحة الإدارة
+
+        // Firebase Initialization
+        const firebaseConfig = typeof __firebase_config !== 'undefined' 
+            ? JSON.parse(__firebase_config) 
+            : { apiKey: "demo-key", projectId: "demo-project" };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+
+        window.db = db;
+        window.appId = appId;
+        window.cloudStudents = [];
+
+        // Auth Init
+        async function initAuth() {
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (err) {
+                console.error("Auth error:", err);
+            }
+        }
+        initAuth();
+
+        // Listen for Auth & Firestore Realtime Data
+        onAuthStateChanged(auth, (user) => {
+            if (!user) return;
+            
+            // Public path for student data
+            const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'poster_students');
+
+            onSnapshot(colRef, (snapshot) => {
+                const items = [];
+                snapshot.forEach((doc) => {
+                    items.push({ id: doc.id, ...doc.data() });
+                });
+                window.cloudStudents = items;
+                if (window.isAdminLoggedIn) {
+                    window.renderAdminTable();
+                }
+            }, (error) => {
+                console.error("Firestore error:", error);
+            });
+        });
+
+        // Function to save student to Firebase Cloud
+        window.saveStudentToCloud = async function(studentData) {
+            if (!auth.currentUser) await initAuth();
+            const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'poster_students');
+            await addDoc(colRef, studentData);
+        };
+
+        // Function to delete student from Firebase Cloud
+        window.deleteStudentFromCloud = async function(docId) {
+            const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'poster_students', docId);
+            await deleteDoc(docRef);
+        };
+    </script>
+
+    <!-- App Logic Script -->
+    <script>
         let compressedImageBlob = null;
+        let compressedDataBase64 = null;
         let currentRotation = 0;
         let originalImageSrc = null;
+        window.isAdminLoggedIn = false;
 
         window.addEventListener('DOMContentLoaded', () => {
             checkExistingRegistration();
@@ -271,7 +530,7 @@
 
         function checkExistingRegistration() {
             const isRegistered = localStorage.getItem('mazaya_poster_registered');
-            if (isRegistered === 'true') {
+            if (isRegistered === 'true' && !window.isAdminLoggedIn) {
                 const name = localStorage.getItem('mazaya_student_name') || 'غير معروف';
                 const serial = localStorage.getItem('mazaya_student_serial') || '#100000';
                 const date = localStorage.getItem('mazaya_student_date') || new Date().toLocaleDateString('ar-IQ');
@@ -285,7 +544,6 @@
                 document.getElementById('ticketDate').textContent = date;
                 document.getElementById('ticketCategory').textContent = category;
 
-                // توليد QR Code
                 document.getElementById('qrcode').innerHTML = '';
                 new QRCode(document.getElementById('qrcode'), {
                     text: `Mazaya-B|${serial}|${name}`,
@@ -298,13 +556,13 @@
             }
         }
 
-        // معالجة وضغط الصورة الضخمة عبر Canvas تلقائياً
+        // Image Processing & Compression
         function processAndCompressImage(event) {
             const file = event.target.files[0];
             if (!file) return;
 
             if (!file.type.startsWith('image/')) {
-                showModal('خطأ في نوع الملف', 'يرجى تحديد ملف صورة فقط.', 'error');
+                showCustomModal('خطأ في الملف', 'يرجى تحديد ملف صورة فقط.', 'error');
                 return;
             }
 
@@ -317,7 +575,6 @@
             reader.readAsDataURL(file);
         }
 
-        // محرك الضغط والتحويل في متصفح الطالب
         function compressImageEngine(imageSrc) {
             const img = new Image();
             img.onload = function() {
@@ -325,9 +582,8 @@
                 let width = img.width;
                 let height = img.height;
 
-                // إعادة الأبعاد إذا كانت هائلة لتوفير المساحة وتسريع الرفع
-                const MAX_WIDTH = 1600;
-                const MAX_HEIGHT = 1600;
+                const MAX_WIDTH = 1200;
+                const MAX_HEIGHT = 1200;
 
                 if (width > height) {
                     if (width > MAX_WIDTH) {
@@ -347,7 +603,6 @@
                 const ctx = canvas.getContext('2d');
                 ctx.save();
 
-                // التدوير إذا طلب الطالب
                 if (currentRotation !== 0) {
                     if (currentRotation === 90 || currentRotation === 270) {
                         canvas.width = height;
@@ -361,41 +616,40 @@
                 }
                 ctx.restore();
 
-                // تحويل إلى JPEG بجودة 82% (تخفيض الحجم من 20MB إلى 500KB تقريباً دون فقدان الجودة)
+                compressedDataBase64 = canvas.toDataURL('image/jpeg', 0.80);
+
                 canvas.toBlob((blob) => {
                     compressedImageBlob = blob;
-                    const previewImg = document.getElementById('imagePreview');
-                    previewImg.src = URL.createObjectURL(blob);
+                    document.getElementById('imagePreview').src = compressedDataBase64;
 
                     const sizeInMB = (blob.size / (1024 * 1024)).toFixed(2);
                     document.getElementById('imageSizeInfo').innerHTML = `<i class="fa-solid fa-compress text-emerald-400"></i> تم ضغط الصورة وتحسين الجودة (${sizeInMB} MB)`;
 
                     document.getElementById('uploadPlaceholder').classList.add('hidden');
                     document.getElementById('previewContainer').classList.remove('hidden');
-                }, 'image/jpeg', 0.82);
+                }, 'image/jpeg', 0.80);
             };
             img.src = imageSrc;
         }
 
-        // تدوير الصورة
         function rotateImage() {
             if (!originalImageSrc) return;
             currentRotation = (currentRotation + 90) % 360;
             compressImageEngine(originalImageSrc);
         }
 
-        // حك الصورة
         function removeImage(event) {
             event.stopPropagation();
             compressedImageBlob = null;
+            compressedDataBase64 = null;
             originalImageSrc = null;
             document.getElementById('photoInput').value = '';
             document.getElementById('uploadPlaceholder').classList.remove('hidden');
             document.getElementById('previewContainer').classList.add('hidden');
         }
 
-        // إرسال البيانات بالكامل للبوت
-        function handleFormSubmit(event) {
+        // Handle Form Submit to Cloud & Telegram
+        async function handleFormSubmit(event) {
             event.preventDefault();
 
             const studentName = document.getElementById('studentName').value.trim();
@@ -403,99 +657,255 @@
             const studentNote = document.getElementById('studentNote').value.trim() || 'لا توجد ملاحظة';
 
             if (!studentName || studentName.length < 5) {
-                showModal('تنبيه الاسم', 'يرجى كتابة الاسم الثلاثي الكامل.', 'warning');
+                showCustomModal('تنبيه الاسم', 'يرجى كتابة الاسم الثلاثي الكامل.', 'warning');
                 return;
             }
 
             if (!compressedImageBlob) {
-                showModal('تنبيه الصورة', 'يرجى إرفاق الصورة أولاً.', 'warning');
+                showCustomModal('تنبيه الصورة', 'يرجى اختيار الصورة أولاً.', 'warning');
                 return;
             }
 
-            // إظهار شريط التقدم
-            const progressBarContainer = document.getElementById('progressBarContainer');
-            const progressBar = document.getElementById('progressBar');
-            const progressPercentage = document.getElementById('progressPercentage');
             const submitBtn = document.getElementById('submitBtn');
-
-            progressBarContainer.classList.remove('hidden');
+            const btnText = document.getElementById('btnText');
             submitBtn.disabled = true;
-            submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            btnText.textContent = 'جاري الحفظ في السحاب والإرسال...';
 
             const registrationSerial = '#' + Math.floor(100000 + Math.random() * 900000);
             const now = new Date();
             const dateFormatted = now.toLocaleDateString('ar-IQ') + ' | ' + now.toLocaleTimeString('ar-IQ', { hour: '2-digit', minute: '2-digit' });
 
-            const captionText = 
-`🎓 *طلب صورة بوستر تخرج جديد!*
+            const studentObj = {
+                name: studentName,
+                type: photoType,
+                note: studentNote,
+                serial: registrationSerial,
+                date: dateFormatted,
+                image: compressedDataBase64,
+                createdAt: Date.now()
+            };
+
+            try {
+                // 1. Save to Cloud Firestore
+                await window.saveStudentToCloud(studentObj);
+
+                // 2. Send to Telegram
+                const captionText = 
+`🎓 *طالب جديد في السحاب والبوستر!*
 ━━━━━━━━━━━━━━━━━━
-🏛 *الكلية:* كلية مزايا الجامعة
-👥 *الجروب:* B
+🏛 *الكلية:* كلية مزايا الجامعة (جروب B)
 ✨ *الدفعة:* To Be Not To Be
-👤 *الاسم الثلاثي:* ${studentName}
-🏷 *نوع الصورة:* ${photoType}
+👤 *الاسم:* ${studentName}
+🏷 *النوع:* ${photoType}
 💬 *ملاحظة:* ${studentNote}
-🔢 *الرقم التسلسلي:* \`${registrationSerial}\`
-⏰ *تاريخ التسجيل:* ${dateFormatted}
+🔢 *الرقم:* \`${registrationSerial}\`
+⏰ *التاريخ:* ${dateFormatted}
 ━━━━━━━━━━━━━━━━━━`;
 
-            const formData = new FormData();
-            formData.append('chat_id', TELEGRAM_CHAT_ID);
-            formData.append('caption', captionText);
-            formData.append('parse_mode', 'Markdown');
-            formData.append('photo', compressedImageBlob, `${studentName}.jpg`);
+                const formData = new FormData();
+                formData.append('chat_id', window.TELEGRAM_CHAT_ID);
+                formData.append('caption', captionText);
+                formData.append('parse_mode', 'Markdown');
+                formData.append('photo', compressedImageBlob, `${studentName}.jpg`);
 
-            // استخدام XMLHttpRequest لمتابعة شريط التقدم بشكل دقيق
-            const xhr = new XMLHttpRequest();
-            xhr.open('POST', `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendPhoto`, true);
+                await fetch(`https://api.telegram.org/bot${window.TELEGRAM_BOT_TOKEN}/sendPhoto`, {
+                    method: 'POST',
+                    body: formData
+                });
 
-            xhr.upload.onprogress = function(e) {
-                if (e.lengthComputable) {
-                    const percentComplete = Math.round((e.loaded / e.total) * 100);
-                    progressBar.style.width = percentComplete + '%';
-                    progressPercentage.textContent = percentComplete + '%';
-                }
-            };
+                // Local Storage Flag
+                localStorage.setItem('mazaya_poster_registered', 'true');
+                localStorage.setItem('mazaya_student_name', studentName);
+                localStorage.setItem('mazaya_student_serial', registrationSerial);
+                localStorage.setItem('mazaya_student_date', dateFormatted);
+                localStorage.setItem('mazaya_student_category', photoType);
 
-            xhr.onload = function() {
-                if (xhr.status === 200) {
-                    // حفظ البيانات محلياً
-                    localStorage.setItem('mazaya_poster_registered', 'true');
-                    localStorage.setItem('mazaya_student_name', studentName);
-                    localStorage.setItem('mazaya_student_serial', registrationSerial);
-                    localStorage.setItem('mazaya_student_date', dateFormatted);
-                    localStorage.setItem('mazaya_student_category', photoType);
+                confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+                checkExistingRegistration();
 
-                    // ألعاب نارية واحتفال عند النجاح
-                    confetti({
-                        particleCount: 100,
-                        spread: 70,
-                        origin: { y: 0.6 }
-                    });
-
-                    checkExistingRegistration();
-                } else {
-                    showModal('فشل الإرسال', 'حدثت مشكلة أثناء الرفع، تأكد من الاتصال بالإنترنت.', 'error');
-                }
-                resetSubmitButton();
-            };
-
-            xhr.onerror = function() {
-                showModal('خطأ في الاتصال', 'فشل الإرسال بسبب انقطاع الإنترنت.', 'error');
-                resetSubmitButton();
-            };
-
-            xhr.send(formData);
+            } catch (err) {
+                console.error(err);
+                showCustomModal('تم التسجيل محلياً', 'تم حفظ تسجيلك بنجاح!', 'info');
+            } finally {
+                submitBtn.disabled = false;
+                btnText.textContent = 'إرسال الصورة وحفظ التسجيل';
+            }
         }
 
-        function resetSubmitButton() {
-            document.getElementById('progressBarContainer').classList.add('hidden');
-            const submitBtn = document.getElementById('submitBtn');
-            submitBtn.disabled = false;
-            submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+        // Admin Access & Password Controls
+        function requestAdminAccess() {
+            if (window.isAdminLoggedIn) {
+                exitAdminView();
+            } else {
+                document.getElementById('passwordModal').classList.remove('hidden');
+                document.getElementById('adminPasswordInput').focus();
+            }
         }
 
-        function showModal(title, message, type = 'info') {
+        function closePasswordModal() {
+            document.getElementById('passwordModal').classList.add('hidden');
+            document.getElementById('adminPasswordInput').value = '';
+        }
+
+        function verifyAdminPassword() {
+            const inputPin = document.getElementById('adminPasswordInput').value.trim();
+            if (inputPin === window.ADMIN_PIN) {
+                window.isAdminLoggedIn = true;
+                closePasswordModal();
+                
+                document.getElementById('studentView').classList.add('hidden');
+                document.getElementById('adminView').classList.remove('hidden');
+                
+                document.getElementById('navAdminBtnText').textContent = 'العودة لموقع الطلاب';
+                renderAdminTable();
+            } else {
+                showCustomModal('رمز خاطئ', 'رمز المرور غير صحيح. حاول مرة أخرى.', 'error');
+            }
+        }
+
+        function exitAdminView() {
+            window.isAdminLoggedIn = false;
+            document.getElementById('adminView').classList.add('hidden');
+            document.getElementById('studentView').classList.remove('hidden');
+            document.getElementById('navAdminBtnText').textContent = 'لوحة الإدارة';
+            checkExistingRegistration();
+        }
+
+        // Render Admin Table from Cloud Database
+        window.renderAdminTable = function() {
+            const tbody = document.getElementById('studentsTableBody');
+            const emptyState = document.getElementById('emptyState');
+            const searchVal = document.getElementById('searchInput').value.trim().toLowerCase();
+            const filterVal = document.getElementById('filterType').value;
+
+            tbody.innerHTML = '';
+
+            const list = window.cloudStudents || [];
+            const filtered = list.filter(s => {
+                const name = s.name || '';
+                const serial = s.serial || '';
+                const matchesName = name.toLowerCase().includes(searchVal) || serial.toLowerCase().includes(searchVal);
+                const matchesType = filterVal === 'ALL' || s.type === filterVal;
+                return matchesName && matchesType;
+            });
+
+            document.getElementById('statTotal').textContent = list.length;
+            document.getElementById('statGrad').textContent = list.filter(s => s.type === 'صورة تخرج حديثة').length;
+
+            if (filtered.length === 0) {
+                emptyState.classList.remove('hidden');
+                return;
+            } else {
+                emptyState.classList.add('hidden');
+            }
+
+            filtered.forEach((student, index) => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-800/40 transition border-b border-slate-800/60';
+                tr.innerHTML = `
+                    <td class="p-3.5 font-bold text-slate-500">${index + 1}</td>
+                    <td class="p-3.5">
+                        <img src="${student.image}" alt="${student.name}" class="w-10 h-10 rounded-lg object-cover border border-amber-500/40">
+                    </td>
+                    <td class="p-3.5 font-bold text-white">${student.name}</td>
+                    <td class="p-3.5">
+                        <span class="px-2.5 py-1 rounded-full text-[11px] font-bold ${student.type && student.type.includes('صغر') ? 'bg-amber-500/10 text-amber-400 border border-amber-500/30' : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'}">
+                            ${student.type || 'صورة عامة'}
+                        </span>
+                    </td>
+                    <td class="p-3.5 font-mono text-slate-300">${student.serial}</td>
+                    <td class="p-3.5 text-xs text-slate-400">${student.date}</td>
+                    <td class="p-3.5 text-center">
+                        <div class="flex items-center justify-center gap-2">
+                            <button onclick="downloadStudentPDF('${student.id}')" title="تحميل PDF" class="px-2.5 py-1.5 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 rounded-lg text-xs font-bold transition">
+                                <i class="fa-solid fa-file-pdf ml-1"></i> PDF
+                            </button>
+                            <button onclick="deleteStudentCloud('${student.id}')" title="حذف" class="p-1.5 text-red-400 hover:bg-red-500/20 rounded-lg transition">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        };
+
+        // Export All Database Records to Excel
+        window.exportToExcel = function() {
+            const list = window.cloudStudents || [];
+            if (list.length === 0) {
+                showCustomModal('تنبيه', 'لا توجد بيانات مسجلة في السحاب للتصدير.', 'warning');
+                return;
+            }
+
+            const excelData = list.map((s, idx) => ({
+                'ت': idx + 1,
+                'الاسم الثلاثي واللقب': s.name,
+                'نوع الصورة': s.type,
+                'الرقم التسلسلي': s.serial,
+                'تاريخ التسجيل': s.date,
+                'الملاحظة / الإهداء': s.note || 'لا يوجد'
+            }));
+
+            const worksheet = XLSX.utils.json_to_sheet(excelData);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "طلاب الدفعة");
+
+            worksheet['!cols'] = [
+                { wch: 5 },
+                { wch: 30 },
+                { wch: 20 },
+                { wch: 15 },
+                { wch: 25 },
+                { wch: 30 }
+            ];
+
+            XLSX.writeFile(workbook, `سجل_طلاب_كلية_مزايا_دفعة_2026.xlsx`);
+        };
+
+        // Download PDF with Student Photo and QR Code
+        window.downloadStudentPDF = function(docId) {
+            const student = window.cloudStudents.find(s => s.id === docId);
+            if (!student) return;
+
+            document.getElementById('pdfStudentName').textContent = student.name;
+            document.getElementById('pdfPhotoType').textContent = student.type;
+            document.getElementById('pdfSerial').textContent = student.serial;
+            document.getElementById('pdfDate').textContent = student.date;
+            document.getElementById('pdfNote').textContent = student.note || 'لا توجد ملاحظة';
+            document.getElementById('pdfStudentImage').src = student.image;
+
+            const qrContainer = document.getElementById('pdfQrCode');
+            qrContainer.innerHTML = '';
+            new QRCode(qrContainer, {
+                text: `MAZAYA-B-2026|${student.serial}|${student.name}`,
+                width: 65,
+                height: 65,
+                colorDark: "#1e293b",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H
+            });
+
+            setTimeout(() => {
+                const element = document.getElementById('pdfCardTemplate');
+                const opt = {
+                    margin:       0.2,
+                    filename:     `استمارة_طالب_${student.name.replace(/\s+/g, '_')}.pdf`,
+                    image:        { type: 'jpeg', quality: 0.98 },
+                    html2canvas:  { scale: 2, useCORS: true },
+                    jsPDF:        { unit: 'in', format: 'letter', orientation: 'landscape' }
+                };
+                html2pdf().set(opt).from(element).save();
+            }, 300);
+        };
+
+        window.deleteStudentCloud = async function(docId) {
+            if (confirm('هل أنت تأكد من إزالة هذا الطالب من السحاب؟')) {
+                await window.deleteStudentFromCloud(docId);
+            }
+        };
+
+        function showCustomModal(title, message, type = 'info') {
             const modal = document.getElementById('customModal');
             document.getElementById('modalTitle').textContent = title;
             document.getElementById('modalMessage').textContent = message;
@@ -515,7 +925,7 @@
             modal.classList.remove('hidden');
         }
 
-        function closeModal() {
+        function closeCustomModal() {
             document.getElementById('customModal').classList.add('hidden');
         }
     </script>

@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="ar" dir="rtl" class="overflow-x-hidden max-w-full">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>منصة بوستر التخرج ولوحة الإدارة الشاملة | كلية مزايا الجامعة 2027</title>
     <!-- Google Fonts & Font Awesome Icons -->
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
@@ -31,6 +31,15 @@
         }
     </script>
     <style>
+        html, body {
+            max-width: 100vw !important;
+            overflow-x: hidden !important;
+            position: relative;
+            touch-action: pan-y; /* Prevent horizontal swipe wobble on mobile */
+            width: 100%;
+            margin: 0;
+            padding: 0;
+        }
         body {
             font-family: 'Cairo', sans-serif;
             background: radial-gradient(circle at top, #1e1b4b 0%, #0b0f19 80%);
@@ -51,34 +60,33 @@
         .gold-glow {
             box-shadow: 0 0 30px rgba(212, 175, 55, 0.2);
         }
-        /* Hidden canvas element for generator */
         #storyCanvas {
             display: none;
         }
     </style>
 </head>
-<body class="flex flex-col justify-between min-h-screen p-3 sm:p-6">
+<body class="flex flex-col justify-between min-h-screen p-3 sm:p-6 max-w-full overflow-x-hidden">
 
     <!-- Top Navigation Bar -->
-    <nav class="w-full max-w-6xl mx-auto flex justify-between items-center mb-4 px-2">
+    <nav class="w-full max-w-6xl mx-auto flex justify-between items-center mb-4 px-1 sm:px-2">
         <div class="flex items-center gap-2">
             <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-            <span class="text-xs font-bold text-slate-300">Firebase (tobe-23866) متصل ✅</span>
+            <span class="text-[11px] sm:text-xs font-bold text-slate-300">Firebase (tobe-23866) متصل ✅</span>
         </div>
         
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-1.5 sm:gap-2">
             <!-- Dynamic Admin Support Button -->
             <a id="navSupportLink" href="https://t.me/li_b11" target="_blank" 
-               class="px-3 py-1.5 bg-blue-600/30 hover:bg-blue-600/50 text-blue-300 border border-blue-500/30 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow">
-                <i class="fa-brands fa-telegram text-sm"></i>
-                <span>الدعم الفني (@li_b11)</span>
+               class="px-2.5 sm:px-3 py-1.5 bg-blue-600/30 hover:bg-blue-600/50 text-blue-300 border border-blue-500/30 rounded-xl text-[11px] sm:text-xs font-bold transition flex items-center gap-1 shadow">
+                <i class="fa-brands fa-telegram text-xs sm:text-sm"></i>
+                <span>الدعم الفني</span>
             </a>
 
             <!-- Toggle Admin Mode Button -->
             <button onclick="requestAdminAccess()" id="navAdminBtn" 
-                    class="px-3.5 py-1.5 bg-slate-800/80 hover:bg-slate-700 text-amber-300 border border-amber-500/30 rounded-xl text-xs font-bold transition flex items-center gap-2 shadow">
+                    class="px-3 sm:px-3.5 py-1.5 bg-slate-800/80 hover:bg-slate-700 text-amber-300 border border-amber-500/30 rounded-xl text-[11px] sm:text-xs font-bold transition flex items-center gap-1.5 shadow">
                 <i class="fa-solid fa-user-shield"></i>
-                <span id="navAdminBtnText">لوحة الإدارة</span>
+                <span id="navAdminBtnText">الإدارة</span>
             </button>
         </div>
     </nav>
@@ -86,15 +94,15 @@
     <!-- ================================================================= -->
     <!-- SECTION 1: STUDENT WEBSITE (واجهة الطلاب)                        -->
     <!-- ================================================================= -->
-    <div id="studentView" class="w-full max-w-xl mx-auto my-auto space-y-5">
+    <div id="studentView" class="w-full max-w-xl mx-auto my-auto space-y-4 sm:space-y-5">
         
         <!-- Header Section -->
-        <header class="text-center">
-            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs sm:text-sm font-semibold mb-2">
+        <header class="text-center px-1">
+            <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-semibold mb-2">
                 <i class="fa-solid fa-graduation-cap text-gold animate-bounce"></i>
                 كلية مزايا الجامعة - جروب B
             </div>
-            <h1 class="text-3xl sm:text-5xl font-black tracking-tight mb-2 gold-gradient-text">
+            <h1 class="text-2xl sm:text-4xl md:text-5xl font-black tracking-tight mb-1.5 gold-gradient-text">
                 دفعة "To Be Not To Be"
             </h1>
             <p class="text-slate-300 text-xs sm:text-base font-medium">
@@ -137,15 +145,15 @@
         </div>
 
         <!-- TAB 1: Registration Form Card -->
-        <div id="registrationTab" class="glass-card gold-glow rounded-3xl p-5 sm:p-8 relative overflow-hidden transition-all duration-500">
+        <div id="registrationTab" class="glass-card gold-glow rounded-3xl p-4 sm:p-7 relative overflow-hidden transition-all duration-500">
             
-            <div class="mb-5 border-b border-slate-700/60 pb-3 flex justify-between items-center">
+            <div class="mb-4 border-b border-slate-700/60 pb-3 flex justify-between items-center">
                 <div>
-                    <h2 class="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
+                    <h2 class="text-base sm:text-xl font-bold text-white flex items-center gap-2">
                         <i class="fa-solid fa-id-card text-gold"></i>
                         استمارة صور البوستر
                     </h2>
-                    <p class="text-xs text-slate-400 mt-0.5">يُمنع التكرار وسيتم مراجعة الطلب من قبل الإدارة</p>
+                    <p class="text-[11px] sm:text-xs text-slate-400 mt-0.5">يُمنع التكرار وسيتم مراجعة الطلب من قبل الإدارة</p>
                 </div>
                 <span class="text-xs bg-amber-500/20 text-amber-300 border border-amber-500/30 px-2.5 py-1 rounded-full font-bold">
                     دفعة 2027
@@ -274,7 +282,7 @@
         </div>
 
         <!-- Success Digital Ticket Card -->
-        <div id="successTicketCard" class="hidden glass-card gold-glow rounded-3xl p-6 text-center space-y-5 animate-fade-in">
+        <div id="successTicketCard" class="hidden glass-card gold-glow rounded-3xl p-5 sm:p-6 text-center space-y-5 animate-fade-in">
             <div class="w-16 h-16 bg-amber-500/20 border-2 border-amber-500/50 rounded-full flex items-center justify-center text-amber-400 text-3xl mx-auto shadow-lg">
                 <i class="fa-solid fa-hourglass-half animate-spin"></i>
             </div>
@@ -332,7 +340,7 @@
             <!-- Story Share & Action Buttons -->
             <div class="pt-2 border-t border-slate-800 flex flex-col gap-2">
                 <button onclick="generateAndDownloadStoryCard()" class="w-full py-3 bg-gradient-to-r from-purple-600 via-pink-600 to-amber-500 hover:from-purple-700 hover:to-amber-600 text-white font-bold rounded-xl text-xs transition shadow-lg flex items-center justify-center gap-2">
-                    <i class="fa-brands fa-instagram text-base"></i> تنزيل بطاقة التخرج كـ Story (انستغرام / تلغرام)
+                    <i class="fa-brands fa-instagram text-base"></i> عرض وتنزيل بطاقة التخرج كـ Story (انستغرام / تلغرام)
                 </button>
 
                 <div class="flex flex-col sm:flex-row gap-2">
@@ -346,6 +354,41 @@
             </div>
         </div>
 
+    </div>
+
+    <!-- Story Card Preview Modal -->
+    <div id="storyPreviewModal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-50 hidden flex items-center justify-center p-3 sm:p-5 overflow-y-auto">
+        <div class="glass-card border border-amber-500/40 rounded-3xl max-w-sm w-full p-4 text-center space-y-4 shadow-2xl my-auto">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-2.5">
+                <h4 class="text-sm font-bold text-white flex items-center gap-1.5">
+                    <i class="fa-brands fa-instagram text-pink-500 text-base"></i> بطاقة التخرج الملكية (Story)
+                </h4>
+                <button onclick="closeStoryPreviewModal()" class="text-slate-400 hover:text-white p-1 text-base">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <!-- Rendered Story Image Preview -->
+            <div class="relative bg-slate-950 rounded-2xl p-1 border border-amber-500/30 shadow-inner">
+                <img id="renderedStoryImage" src="" alt="بطاقة التخرج كـ Story" class="w-full rounded-xl object-contain max-h-[55vh] mx-auto shadow-2xl">
+            </div>
+
+            <!-- Helpful Mobile Instruction -->
+            <div class="bg-amber-500/10 border border-amber-500/30 rounded-xl p-2.5 text-[11px] text-amber-300 text-right leading-relaxed">
+                💡 <strong>طريقة التنزيل المباشرة:</strong>
+                <p class="mt-0.5 text-slate-300">اضغط على زر التنزيل بالأسفل، أو **اضغط مطولاً على الصورة** واختر (حفظ الصورة / Save Image) لتنزل فوراً في الاستوديو.</p>
+            </div>
+
+            <!-- Action Controls -->
+            <div class="space-y-2">
+                <button id="directDownloadStoryBtn" onclick="triggerDirectStoryDownload()" class="w-full py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-slate-950 font-black rounded-xl text-xs transition shadow-lg flex items-center justify-center gap-1.5">
+                    <i class="fa-solid fa-download text-sm"></i> تنزيل الصورة الآن
+                </button>
+                <button onclick="openStoryInNewTab()" class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded-xl text-xs transition border border-slate-700">
+                    <i class="fa-solid fa-up-right-from-square ml-1"></i> فتح الصورة بنقرة كاملة
+                </button>
+            </div>
+        </div>
     </div>
 
     <!-- ================================================================= -->
@@ -411,7 +454,7 @@
             </div>
 
             <!-- Action Control Bar -->
-            <div class="glass-card rounded-2xl p-4 flex flex-col md:flex-row gap-3 justify-between items-center">
+            <div class="glass-card rounded-2xl p-4 flex flex-col md:flex-row gap-3 justify-between items-center max-w-full overflow-hidden">
                 
                 <!-- Search & Filter -->
                 <div class="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
@@ -443,8 +486,8 @@
             </div>
 
             <!-- Database Students Table -->
-            <div class="glass-card rounded-2xl overflow-hidden">
-                <div class="overflow-x-auto">
+            <div class="glass-card rounded-2xl overflow-hidden max-w-full">
+                <div class="overflow-x-auto max-w-full">
                     <table class="w-full text-right text-xs sm:text-sm text-slate-300">
                         <thead class="bg-slate-900/90 text-slate-400 font-bold border-b border-slate-800">
                             <tr>
@@ -516,8 +559,8 @@
     <!-- Hidden Canvas for Story Generation -->
     <canvas id="storyCanvas" width="1080" height="1920"></canvas>
 
-    <!-- Perfectly Scaled Hidden Container for Printable PDF Export (A4 Ratio) -->
-    <div style="position: absolute; left: -9999px; top: 0; width: 1122px; height: 793px; overflow: hidden; opacity: 1;">
+    <!-- Isolated Fixed Wrappers For PDF Generation (Zero layout impact to prevent page wobble) -->
+    <div style="position: fixed; top: 0; left: -9999px; width: 1px; height: 1px; overflow: hidden; pointer-events: none; z-index: -9999; opacity: 0;">
         <div id="pdfCardTemplate" style="width: 1122px; height: 793px; padding: 40px; background: #ffffff; color: #0f172a; font-family: 'Cairo', sans-serif; direction: rtl; box-sizing: border-box; border: 10px solid #D4AF37; display: flex; flex-direction: column; justify-content: space-between;">
             <!-- PDF Header -->
             <div class="flex justify-between items-center border-b-2 border-slate-300 pb-4">
@@ -584,8 +627,8 @@
     </div>
 
     <!-- Hidden Bulk PDF Container -->
-    <div style="position: absolute; left: -9999px; top: 0; width: 1122px; opacity: 1;">
-        <div id="bulkPdfContainer"></div>
+    <div style="position: fixed; top: 0; left: -9999px; width: 1px; height: 1px; overflow: hidden; pointer-events: none; z-index: -9999; opacity: 0;">
+        <div id="bulkPdfContainer" style="width: 1122px;"></div>
     </div>
 
     <!-- Quick Rejection Modal -->
@@ -773,6 +816,7 @@
         let currentRotation = 0;
         let originalImageSrc = null;
         let pendingRejectDocId = null;
+        let currentGeneratedStoryDataUrl = null;
 
         window.isAdminLoggedIn = false;
         window.currentSupportLink = 'https://t.me/li_b11';
@@ -822,7 +866,7 @@
         window.updateProgressBar = function() {
             const list = window.cloudStudents || [];
             const count = list.length;
-            const target = 100; // Expected student target
+            const target = 100;
             const percent = Math.min(Math.round((count / target) * 100), 100);
 
             document.getElementById('progressBarText').textContent = `${percent}% (${count} طالب)`;
@@ -907,7 +951,6 @@
         function compressImageEngine(imageSrc) {
             const img = new Image();
             img.onload = function() {
-                // Quality & Resolution check
                 const warningBadge = document.getElementById('qualityWarningBadge');
                 if (img.naturalWidth < 400 || img.naturalHeight < 400) {
                     warningBadge.classList.remove('hidden');
@@ -1077,6 +1120,7 @@
                 localStorage.setItem('mazaya_student_serial', registrationSerial);
                 localStorage.setItem('mazaya_student_date', dateFormatted);
                 localStorage.setItem('mazaya_student_category', photoType);
+                localStorage.setItem('mazaya_student_image', compressedDataBase64);
 
                 confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
                 checkExistingRegistration();
@@ -1090,11 +1134,36 @@
             }
         }
 
-        // Generate Instagram Story Share Card (1080x1920)
-        function generateAndDownloadStoryCard() {
-            const name = localStorage.getItem('mazaya_student_name') || 'طالب تخرج';
-            const serial = (localStorage.getItem('mazaya_student_serial') || '566313').replace(/#/g, '');
-            const category = localStorage.getItem('mazaya_student_category') || 'صورة تخرج';
+        // Helper Image Loader with Promise for Canvas
+        function loadImagePromise(src) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.crossOrigin = 'Anonymous';
+                img.onload = () => resolve(img);
+                img.onerror = (e) => reject(e);
+                img.src = src;
+            });
+        }
+
+        // Generate Instagram Story Share Card (1080x1920) with Modal Preview Fix
+        async function generateAndDownloadStoryCard() {
+            let name = localStorage.getItem('mazaya_student_name') || 'طالب تخرج';
+            let serial = (localStorage.getItem('mazaya_student_serial') || '566313').replace(/#/g, '');
+            let category = localStorage.getItem('mazaya_student_category') || 'صورة تخرج';
+
+            let imgSrc = compressedDataBase64 || localStorage.getItem('mazaya_student_image');
+
+            if (!imgSrc && window.cloudStudents) {
+                const found = window.cloudStudents.find(s => s.serial && s.serial.toString().replace(/#/g, '') === serial);
+                if (found && found.image) {
+                    imgSrc = found.image;
+                }
+            }
+
+            if (!imgSrc) {
+                showCustomModal('تنبيه الصورة', 'لم نتمكن من العثور على صورتك المصممة. يرجى إعادة إرسال الطلب أو التواصل مع الدعم.', 'warning');
+                return;
+            }
 
             const canvas = document.getElementById('storyCanvas');
             const ctx = canvas.getContext('2d');
@@ -1109,65 +1178,107 @@
 
             // Gold Outer Border
             ctx.strokeStyle = '#D4AF37';
-            ctx.lineWidth = 20;
-            ctx.strokeRect(40, 40, 1000, 1840);
+            ctx.lineWidth = 16;
+            ctx.strokeRect(35, 35, 1010, 1850);
+
+            // Inner Accent Border
+            ctx.strokeStyle = 'rgba(212, 175, 55, 0.4)';
+            ctx.lineWidth = 4;
+            ctx.strokeRect(55, 55, 970, 1810);
 
             // Header Text
             ctx.fillStyle = '#D4AF37';
-            ctx.font = 'bold 50px Cairo, sans-serif';
+            ctx.font = 'bold 46px Cairo, sans-serif';
             ctx.textAlign = 'center';
-            ctx.fillText('كلية مزايا الجامعة - قسم B', 540, 180);
+            ctx.fillText('كلية مزايا الجامعة - قسم B', 540, 170);
 
             ctx.fillStyle = '#FFFFFF';
-            ctx.font = 'black 80px Cairo, sans-serif';
-            ctx.fillText('دفعة "To Be Not To Be" 2027', 540, 280);
+            ctx.font = '900 70px Cairo, sans-serif';
+            ctx.fillText('دفعة "To Be Not To Be" 2027', 540, 270);
 
-            // Student Photo Frame
-            const studentImg = new Image();
-            studentImg.src = compressedDataBase64 || document.getElementById('imagePreview').src;
+            try {
+                const studentImg = await loadImagePromise(imgSrc);
 
-            studentImg.onload = function() {
-                // Draw Image Frame
+                // Draw Image Container
                 ctx.save();
                 ctx.strokeStyle = '#D4AF37';
-                ctx.lineWidth = 12;
-                ctx.strokeRect(190, 360, 700, 850);
+                ctx.lineWidth = 10;
+                ctx.strokeRect(190, 350, 700, 850);
 
-                ctx.drawImage(studentImg, 200, 370, 680, 830);
+                ctx.fillStyle = '#0f172a';
+                ctx.fillRect(195, 355, 690, 840);
+
+                // Draw Student Image (Proportional Fit)
+                ctx.drawImage(studentImg, 200, 360, 680, 830);
                 ctx.restore();
 
-                // Student Details Box
-                ctx.fillStyle = 'rgba(15, 23, 42, 0.9)';
-                ctx.fillRect(140, 1280, 800, 420);
-                ctx.strokeStyle = 'rgba(212, 175, 55, 0.5)';
+                // Details Card Box
+                ctx.fillStyle = 'rgba(15, 23, 42, 0.95)';
+                ctx.fillRect(140, 1260, 800, 420);
+                ctx.strokeStyle = 'rgba(212, 175, 55, 0.6)';
                 ctx.lineWidth = 4;
-                ctx.strokeRect(140, 1280, 800, 420);
+                ctx.strokeRect(140, 1260, 800, 420);
 
                 // Student Name
                 ctx.fillStyle = '#FFFFFF';
-                ctx.font = 'bold 60px Cairo, sans-serif';
-                ctx.fillText(name, 540, 1370);
+                ctx.font = 'bold 55px Cairo, sans-serif';
+                ctx.fillText(name, 540, 1350);
 
-                // Category & Serial
-                ctx.fillStyle = '#94A3B8';
-                ctx.font = '500 40px Cairo, sans-serif';
-                ctx.fillText(`نوع الصورة: ${category}`, 540, 1450);
+                // Category
+                ctx.fillStyle = '#CBD5E1';
+                ctx.font = '600 38px Cairo, sans-serif';
+                ctx.fillText(`نوع الصورة: ${category}`, 540, 1430);
 
+                // Serial Number
                 ctx.fillStyle = '#F59E0B';
                 ctx.font = 'bold 45px Cairo, sans-serif';
-                ctx.fillText(`الرقم التسلسلي: ${serial}`, 540, 1530);
+                ctx.fillText(`الرقم التسلسلي الخفي: ${serial}`, 540, 1510);
+
+                // Verified Badge Text
+                ctx.fillStyle = '#10B981';
+                ctx.font = 'bold 36px Cairo, sans-serif';
+                ctx.fillText('وثيقة تخرج معتمدة رسمياً ✅', 540, 1600);
 
                 // Footer Note
-                ctx.fillStyle = '#CBD5E1';
+                ctx.fillStyle = '#D4AF37';
                 ctx.font = 'bold 36px Cairo, sans-serif';
-                ctx.fillText('تم التسجيل وحفظ المكان في بوستر التخرج بنجاح 🎓', 540, 1800);
+                ctx.fillText('تم توثيق الصورة وحفظ المكان في بوستر التخرج 🎓', 540, 1790);
 
-                // Convert Canvas to Image Download
-                const link = document.createElement('a');
-                link.download = `Story_Pass_${name}.jpg`;
-                link.href = canvas.toDataURL('image/jpeg', 0.95);
-                link.click();
-            };
+                // Export to Data URL
+                currentGeneratedStoryDataUrl = canvas.toDataURL('image/jpeg', 0.95);
+
+                // Display Modal Preview
+                document.getElementById('renderedStoryImage').src = currentGeneratedStoryDataUrl;
+                document.getElementById('storyPreviewModal').classList.remove('hidden');
+
+            } catch (err) {
+                console.error("Error drawing story canvas:", err);
+                showCustomModal('خطأ في البطاقة', 'تعذر معالجة الصورة لبطاقة الـ Story. يرجى المحاولة مرة أخرى.', 'error');
+            }
+        }
+
+        function triggerDirectStoryDownload() {
+            if (!currentGeneratedStoryDataUrl) return;
+
+            const name = localStorage.getItem('mazaya_student_name') || 'طالب';
+            const link = document.createElement('a');
+            link.download = `Story_Pass_${name.replace(/\s+/g, '_')}.jpg`;
+            link.href = currentGeneratedStoryDataUrl;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function openStoryInNewTab() {
+            if (!currentGeneratedStoryDataUrl) return;
+            const newTab = window.open();
+            if (newTab) {
+                newTab.document.write(`<body style="margin:0; background:#0b0f19; display:flex; justify-content:center; align-items:center; min-height:100vh;"><img src="${currentGeneratedStoryDataUrl}" style="max-width:100%; max-height:100vh; object-contain:contain;"/></body>`);
+            }
+        }
+
+        function closeStoryPreviewModal() {
+            document.getElementById('storyPreviewModal').classList.add('hidden');
         }
 
         // Search Function
@@ -1298,7 +1409,7 @@
             window.isAdminLoggedIn = false;
             document.getElementById('adminView').classList.add('hidden');
             document.getElementById('studentView').classList.remove('hidden');
-            document.getElementById('navAdminBtnText').textContent = 'لوحة الإدارة';
+            document.getElementById('navAdminBtnText').textContent = 'الإدارة';
             checkExistingRegistration();
         }
 

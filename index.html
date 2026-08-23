@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>بوستر التخرج ولوحة الإدارة | كلية مزايا الجامعة</title>
+    <title>بوستر التخرج الجماعي  | كلية مزايا الجامعة</title>
     <!-- Google Fonts & Font Awesome Icons -->
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -65,25 +65,35 @@
     <!-- Top Navigation Bar -->
     <nav class="w-full max-w-6xl mx-auto flex justify-between items-center mb-6 px-2">
         <div class="flex items-center gap-2">
-            <span class="w-3 h-3 rounded-full bg-emerald-500 animate-pulse"></span>
-            <span class="text-xs font-bold text-slate-300">النظام السحابي متصل</span>
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span class="text-xs font-bold text-slate-300">Firebase (tobe-23866) متصل ✅</span>
         </div>
         
-        <!-- Toggle Admin Mode Button -->
-        <button onclick="requestAdminAccess()" id="navAdminBtn" class="px-3.5 py-1.5 bg-slate-800/80 hover:bg-slate-700 text-amber-300 border border-amber-500/30 rounded-xl text-xs font-bold transition flex items-center gap-2 shadow">
-            <i class="fa-solid fa-user-shield"></i>
-            <span id="navAdminBtnText">لوحة الإدارة</span>
-        </button>
+        <div class="flex items-center gap-2">
+            <!-- Dynamic Admin Support Button -->
+            <a id="navSupportLink" href="https://t.me/mazaya_admin" target="_blank" 
+               class="px-3 py-1.5 bg-blue-600/30 hover:bg-blue-600/50 text-blue-300 border border-blue-500/30 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow">
+                <i class="fa-brands fa-telegram text-sm"></i>
+                <span>الدعم الفني</span>
+            </a>
+
+            <!-- Toggle Admin Mode Button -->
+            <button onclick="requestAdminAccess()" id="navAdminBtn" 
+                    class="px-3.5 py-1.5 bg-slate-800/80 hover:bg-slate-700 text-amber-300 border border-amber-500/30 rounded-xl text-xs font-bold transition flex items-center gap-2 shadow">
+                <i class="fa-solid fa-user-shield"></i>
+                <span id="navAdminBtnText">لوحة الإدارة</span>
+            </button>
+        </div>
     </nav>
 
     <!-- ================================================================= -->
     <!-- SECTION 1: STUDENT WEBSITE (واجهة الطلاب)                        -->
     <!-- ================================================================= -->
-    <div id="studentView" class="w-full max-w-xl mx-auto my-auto space-y-6">
+    <div id="studentView" class="w-full max-w-xl mx-auto my-auto space-y-5">
         
         <!-- Header Section -->
         <header class="text-center">
-            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs sm:text-sm font-semibold mb-3">
+            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs sm:text-sm font-semibold mb-2">
                 <i class="fa-solid fa-graduation-cap text-gold animate-bounce"></i>
                 كلية مزايا الجامعة - جروب B
             </div>
@@ -95,16 +105,26 @@
             </p>
         </header>
 
-        <!-- Registration Form Card -->
-        <div id="registrationFormCard" class="glass-card gold-glow rounded-3xl p-5 sm:p-8 relative overflow-hidden transition-all duration-500">
+        <!-- Navigation Tabs: Register / Inquiry -->
+        <div class="flex rounded-2xl bg-slate-900/90 p-1 border border-slate-800 text-xs sm:text-sm font-bold">
+            <button id="tabRegisterBtn" onclick="switchStudentTab('register')" class="w-1/2 py-2.5 rounded-xl bg-amber-500 text-slate-950 font-black shadow transition">
+                <i class="fa-solid fa-pen-to-square ml-1"></i> تقديم طلب جديد
+            </button>
+            <button id="tabInquiryBtn" onclick="switchStudentTab('inquiry')" class="w-1/2 py-2.5 rounded-xl text-slate-400 hover:text-white transition">
+                <i class="fa-solid fa-key ml-1"></i> الاستعلام بالرقم التسلسلي فقط
+            </button>
+        </div>
+
+        <!-- TAB 1: Registration Form Card -->
+        <div id="registrationTab" class="glass-card gold-glow rounded-3xl p-5 sm:p-8 relative overflow-hidden transition-all duration-500">
             
-            <div class="mb-5 border-b border-slate-700/60 pb-4 flex justify-between items-center">
+            <div class="mb-5 border-b border-slate-700/60 pb-3 flex justify-between items-center">
                 <div>
                     <h2 class="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
                         <i class="fa-solid fa-id-card text-gold"></i>
                         استمارة صور البوستر
                     </h2>
-                    <p class="text-xs text-slate-400 mt-0.5">سيتم الحفظ في قاعدة البيانات والبوستر فوراً</p>
+                    <p class="text-xs text-slate-400 mt-0.5">يُمنع التكرار وسيتم مراجعة الطلب من قبل الإدارة</p>
                 </div>
                 <span class="text-xs bg-amber-500/20 text-amber-300 border border-amber-500/30 px-2.5 py-1 rounded-full font-bold">
                     دفعة 2026
@@ -123,7 +143,7 @@
                             <i class="fa-solid fa-user"></i>
                         </span>
                         <input type="text" id="studentName" required autocomplete="off"
-                            placeholder="اكتب اسمك الثلاثي مع اللقب..."
+                            placeholder="اكتب اسمك الثلاثي كامل..."
                             class="w-full pr-10 pl-4 py-3 bg-slate-900/90 border border-slate-700 focus:border-gold focus:ring-1 focus:ring-gold rounded-xl text-white placeholder-slate-500 text-sm transition-all outline-none">
                     </div>
                 </div>
@@ -201,15 +221,52 @@
             </form>
         </div>
 
+        <!-- TAB 2: Inquiry / Search Status Card (EXCLUSIVELY BY SERIAL NUMBER) -->
+        <div id="inquiryTab" class="hidden glass-card gold-glow rounded-3xl p-5 sm:p-8 space-y-5">
+            <div class="border-b border-slate-700/60 pb-3">
+                <h2 class="text-lg font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-lock text-gold"></i>
+                    الاستعلام السري بالرقم التسلسلي فقط
+                </h2>
+                <p class="text-xs text-slate-400 mt-1">
+                    <i class="fa-solid fa-shield-halved text-amber-400"></i> خيار البحث بالاسم ملغى نهائياً لضمان الخصوصية. يرجى إدخال الرقم التسلسلي الخاص بك فقط (مثال: <span class="text-amber-300 font-mono">#123456</span>)
+                </p>
+            </div>
+
+            <div class="flex gap-2">
+                <input type="text" id="inquiryInput" placeholder="اكتب رقمك التسلسلي الخفي الخاص فقط..." 
+                       class="w-full py-3 px-4 bg-slate-900 border border-slate-700 rounded-xl text-sm text-white focus:border-gold outline-none font-mono">
+                <button onclick="searchStudentBySerialOnly()" class="px-5 py-3 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold rounded-xl text-sm transition">
+                    بحث
+                </button>
+            </div>
+
+            <!-- Search Result Container -->
+            <div id="searchResultArea" class="hidden space-y-4">
+                <!-- Single Student Result Rendered via JS -->
+            </div>
+        </div>
+
         <!-- Success Digital Ticket Card -->
         <div id="successTicketCard" class="hidden glass-card gold-glow rounded-3xl p-6 text-center space-y-5 animate-fade-in">
-            <div class="w-16 h-16 bg-emerald-500/20 border-2 border-emerald-500/50 rounded-full flex items-center justify-center text-emerald-400 text-3xl mx-auto shadow-lg">
-                <i class="fa-solid fa-circle-check"></i>
+            <div class="w-16 h-16 bg-amber-500/20 border-2 border-amber-500/50 rounded-full flex items-center justify-center text-amber-400 text-3xl mx-auto shadow-lg">
+                <i class="fa-solid fa-hourglass-half animate-spin"></i>
             </div>
             
             <div>
-                <h3 class="text-xl sm:text-2xl font-black text-white">تم استلام صورتك وتأكيد حجزك! 🎉</h3>
-                <p class="text-slate-300 text-xs sm:text-sm mt-1">بطاقة تأكيد التسجيل الرسمية لبوستر التخرج</p>
+                <h3 class="text-xl sm:text-2xl font-black text-white">تم استلام طلبك بنجاح! 🎓</h3>
+                <p class="text-slate-300 text-xs sm:text-sm mt-1">الطلب حالياً قيد المراجعة والتدقيق من قبل إدارة الدفعة</p>
+            </div>
+
+            <!-- Important Warning Box -->
+            <div class="p-3.5 bg-amber-500/15 border-2 border-amber-500/40 rounded-2xl text-right space-y-2">
+                <div class="flex items-center gap-2 text-amber-300 font-bold text-xs sm:text-sm">
+                    <i class="fa-solid fa-triangle-exclamation text-amber-400 text-base"></i>
+                    تنبيه هام جداً: قم باحتفاظ وتصوير هذه الشاشة!
+                </div>
+                <p class="text-xs text-slate-300 leading-relaxed">
+                    احفظ **الرقم التسلسلي** الموضح أدناه، لأنك ستحتاجه حصرياً لمعرفة هل قُبلت صورتك أم رُفضت من تبويب الاستعلام (لا يمكن البحث بالاسم مطلقاً).
+                </p>
             </div>
 
             <!-- Digital Pass Ticket Design -->
@@ -220,8 +277,8 @@
                         <span id="ticketName" class="text-amber-300 font-bold text-sm">---</span>
                     </div>
                     <div class="text-left">
-                        <span class="text-[10px] text-slate-400 block">الرقم التسلسلي</span>
-                        <span id="ticketSerial" class="text-white font-mono font-bold text-xs bg-slate-800 px-2 py-0.5 rounded border border-slate-700">#000000</span>
+                        <span class="text-[10px] text-slate-400 block">الرقم التسلسلي الخفي</span>
+                        <span id="ticketSerial" class="text-white font-mono font-bold text-sm bg-amber-500/20 px-2.5 py-1 rounded border border-amber-500/40">#000000</span>
                     </div>
                 </div>
 
@@ -231,8 +288,8 @@
                         <span id="ticketCategory" class="text-slate-200 text-xs font-semibold">---</span>
                     </div>
                     <div class="text-left">
-                        <span class="text-[10px] text-slate-400 block">تاريخ الإرسال</span>
-                        <span id="ticketDate" class="text-slate-300 text-[11px] font-mono">---</span>
+                        <span class="text-[10px] text-slate-400 block">حالة الطلب الحالية</span>
+                        <span id="ticketStatusText" class="text-amber-400 text-xs font-bold">قيد المراجعة والتدقيق ⏳</span>
                     </div>
                 </div>
 
@@ -246,9 +303,13 @@
                 </div>
             </div>
 
-            <p class="text-xs text-amber-400/90 bg-amber-500/10 border border-amber-500/20 p-3 rounded-xl">
-                <i class="fa-solid fa-lock ml-1"></i> تم حفظ بياناتك في السحاب وفي جهازك. لا يمكن إعادة التسجيل مرة أخرى.
-            </p>
+            <!-- Dynamic Support Link Box -->
+            <div class="p-3 bg-blue-500/10 border border-blue-500/20 rounded-xl flex justify-between items-center text-xs">
+                <span class="text-slate-300 font-semibold">واجهتك مشكلة أو تريد الاستفسار؟</span>
+                <a id="cardSupportBtn" href="https://t.me/mazaya_admin" target="_blank" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold transition flex items-center gap-1">
+                    <i class="fa-brands fa-telegram"></i> مراسلة الدعم
+                </a>
+            </div>
         </div>
 
     </div>
@@ -266,20 +327,39 @@
                 </div>
                 <div>
                     <h2 class="text-xl sm:text-2xl font-black text-white">لوحة إدارة بوستر التخرج السحابية 👑</h2>
-                    <p class="text-xs text-slate-400">إدارة قاعدة البيانات الحيّة والتصدير لـ Excel و PDF</p>
+                    <p class="text-xs text-slate-400">إدارة التدقيق والقبول وقاعدة البيانات الحيّة (tobe-23866)</p>
                 </div>
             </div>
 
-            <!-- Stats Badge -->
-            <div class="flex items-center gap-3 bg-slate-900/80 border border-slate-800 p-2.5 px-4 rounded-xl">
-                <div class="text-center px-3 border-l border-slate-800">
-                    <span class="text-xs text-slate-400 block">المسجلين بالسحاب</span>
-                    <span id="statTotal" class="text-lg font-bold text-amber-400">0</span>
+            <!-- Admin Dynamic Support Link Setting Box -->
+            <div class="bg-slate-900/90 border border-amber-500/30 p-3 rounded-2xl flex flex-col sm:flex-row items-center gap-2 w-full md:w-auto">
+                <div class="text-right">
+                    <span class="text-[11px] text-amber-400 font-bold block"><i class="fa-brands fa-telegram ml-1"></i> رابط / معرّف الدعم الفني:</span>
+                    <span id="currentSupportDisplay" class="text-xs text-slate-300 font-mono">@mazaya_admin</span>
                 </div>
-                <div class="text-center px-3">
-                    <span class="text-xs text-slate-400 block">صور التخرج</span>
-                    <span id="statGrad" class="text-lg font-bold text-emerald-400">0</span>
-                </div>
+                <button onclick="changeAdminSupportLink()" class="px-3 py-1.5 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 rounded-xl text-xs font-bold transition">
+                    تغيير رابط الدعم
+                </button>
+            </div>
+        </div>
+
+        <!-- Stats Bar -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div class="glass-card p-3.5 rounded-2xl text-center border-b-2 border-amber-400">
+                <span class="text-xs text-slate-400 block">إجمالي الطلبات</span>
+                <span id="statTotal" class="text-xl font-bold text-white">0</span>
+            </div>
+            <div class="glass-card p-3.5 rounded-2xl text-center border-b-2 border-emerald-400">
+                <span class="text-xs text-slate-400 block">المقبولة والظاهرة</span>
+                <span id="statApproved" class="text-xl font-bold text-emerald-400">0</span>
+            </div>
+            <div class="glass-card p-3.5 rounded-2xl text-center border-b-2 border-amber-500">
+                <span class="text-xs text-slate-400 block">قيد المراجعة والتدقيق</span>
+                <span id="statPending" class="text-xl font-bold text-amber-400">0</span>
+            </div>
+            <div class="glass-card p-3.5 rounded-2xl text-center border-b-2 border-red-500">
+                <span class="text-xs text-slate-400 block">الطلبات المرفوضة</span>
+                <span id="statRejected" class="text-xl font-bold text-red-400">0</span>
             </div>
         </div>
 
@@ -290,13 +370,14 @@
             <div class="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
                 <div class="relative w-full sm:w-64">
                     <i class="fa-solid fa-magnifying-glass absolute right-3 top-3 text-slate-400 text-xs"></i>
-                    <input type="text" id="searchInput" oninput="renderAdminTable()" placeholder="بحث باسم الطالب..." 
+                    <input type="text" id="searchInput" oninput="renderAdminTable()" placeholder="بحث باسم الطالب أو السيريال..." 
                            class="w-full pr-9 pl-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:border-gold outline-none">
                 </div>
                 <select id="filterType" onchange="renderAdminTable()" class="bg-slate-900 border border-slate-700 text-xs text-white py-2 px-3 rounded-xl focus:border-gold outline-none">
-                    <option value="ALL">جميع الصور</option>
-                    <option value="صورة صغر (طفولة)">صور الصغر (الطفولة)</option>
-                    <option value="صورة تخرج حديثة">صور التخرج الحديثة</option>
+                    <option value="ALL">جميع الحالات</option>
+                    <option value="APPROVED">المقبولة فقط ✅</option>
+                    <option value="PENDING">قيد الانتظار ⏳</option>
+                    <option value="REJECTED">المرفوضة ❌</option>
                 </select>
             </div>
 
@@ -320,10 +401,11 @@
                             <th class="p-3.5">#</th>
                             <th class="p-3.5">الصورة</th>
                             <th class="p-3.5">الاسم الثلاثي</th>
-                            <th class="p-3.5">نوع الصورة</th>
+                            <th class="p-3.5">النوع</th>
                             <th class="p-3.5">الرقم التسلسلي</th>
-                            <th class="p-3.5">تاريخ التسجيل</th>
-                            <th class="p-3.5 text-center">الإجراءات والاستمارة</th>
+                            <th class="p-3.5">الحالة الحالية</th>
+                            <th class="p-3.5 text-center">قرار الإدارة والقبول</th>
+                            <th class="p-3.5 text-center">الإجراءات</th>
                         </tr>
                     </thead>
                     <tbody id="studentsTableBody" class="divide-y divide-slate-800/60">
@@ -346,7 +428,7 @@
             <div class="flex justify-between items-center border-b-2 border-slate-200 pb-4 mb-6">
                 <div>
                     <h2 class="text-2xl font-black text-slate-900">كلية مزايا الجامعة</h2>
-                    <p class="text-sm font-bold text-amber-600">جروب B &bull; دفعة To Be Not To Be 2026</p>
+                    <p class="text-sm font-bold text-amber-600">كروب B &bull; دفعة To Be Not To Be 2026</p>
                     <p class="text-xs text-slate-500 mt-0.5">استمارة توثيق صورة البوستر الرسمية</p>
                 </div>
                 <div class="text-left">
@@ -445,73 +527,71 @@
     <!-- Firebase System Modules -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // إعدادات البوت والرمز السري
         window.TELEGRAM_BOT_TOKEN = '8627770155:AAFB1hRBVMtPRLcLe0TtIQtZXZpS7DLcQ8A';
         window.TELEGRAM_CHAT_ID = '909090929';
-        window.ADMIN_PIN = '2026'; // رمز الدخول للوحة الإدارة
+        window.ADMIN_PIN = '2026';
 
-        // Firebase Initialization
-        const firebaseConfig = typeof __firebase_config !== 'undefined' 
-            ? JSON.parse(__firebase_config) 
-            : { apiKey: "demo-key", projectId: "demo-project" };
+        // Firebase Credentials (tobe-23866)
+        const firebaseConfig = {
+            apiKey: "AIzaSyA6rVkDvwsgt9NAhnKpAi_oM8B6WrT2XZ0",
+            authDomain: "tobe-23866.firebaseapp.com",
+            projectId: "tobe-23866",
+            storageBucket: "tobe-23866.firebasestorage.app",
+            messagingSenderId: "167193487550",
+            appId: "1:167193487550:web:df5a7eee0861c40db996ef",
+            measurementId: "G-VR8YHLG896"
+        };
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
 
         window.db = db;
-        window.appId = appId;
         window.cloudStudents = [];
 
-        // Auth Init
         async function initAuth() {
             try {
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    await signInAnonymously(auth);
-                }
+                await signInAnonymously(auth);
             } catch (err) {
                 console.error("Auth error:", err);
             }
         }
         initAuth();
 
-        // Listen for Auth & Firestore Realtime Data
-        onAuthStateChanged(auth, (user) => {
-            if (!user) return;
-            
-            // Public path for student data
-            const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'poster_students');
+        const colRef = collection(db, 'poster_students');
 
-            onSnapshot(colRef, (snapshot) => {
-                const items = [];
-                snapshot.forEach((doc) => {
-                    items.push({ id: doc.id, ...doc.data() });
-                });
-                window.cloudStudents = items;
-                if (window.isAdminLoggedIn) {
-                    window.renderAdminTable();
-                }
-            }, (error) => {
-                console.error("Firestore error:", error);
+        onSnapshot(colRef, (snapshot) => {
+            const items = [];
+            snapshot.forEach((doc) => {
+                items.push({ id: doc.id, ...doc.data() });
             });
+            window.cloudStudents = items;
+            if (window.isAdminLoggedIn) {
+                window.renderAdminTable();
+            }
+        }, (error) => {
+            console.error("Firestore error:", error);
         });
 
-        // Function to save student to Firebase Cloud
         window.saveStudentToCloud = async function(studentData) {
             if (!auth.currentUser) await initAuth();
-            const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'poster_students');
+            const colRef = collection(db, 'poster_students');
             await addDoc(colRef, studentData);
         };
 
-        // Function to delete student from Firebase Cloud
+        window.updateStudentStatusInCloud = async function(docId, newStatus, reason = '') {
+            const docRef = doc(db, 'poster_students', docId);
+            await updateDoc(docRef, {
+                status: newStatus,
+                rejectionReason: reason
+            });
+        };
+
         window.deleteStudentFromCloud = async function(docId) {
-            const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'poster_students', docId);
+            const docRef = doc(db, 'poster_students', docId);
             await deleteDoc(docRef);
         };
     </script>
@@ -525,8 +605,59 @@
         window.isAdminLoggedIn = false;
 
         window.addEventListener('DOMContentLoaded', () => {
+            loadSavedSupportLink();
             checkExistingRegistration();
         });
+
+        // Dynamic Support Link Management
+        function loadSavedSupportLink() {
+            const savedLink = localStorage.getItem('mazaya_support_telegram_link') || 'https://t.me/mazaya_admin';
+            window.currentSupportLink = savedLink;
+
+            document.getElementById('navSupportLink').href = savedLink;
+            document.getElementById('cardSupportBtn').href = savedLink;
+            
+            const displayHandle = savedLink.includes('t.me/') ? '@' + savedLink.split('t.me/')[1] : savedLink;
+            const displayElem = document.getElementById('currentSupportDisplay');
+            if (displayElem) displayElem.textContent = displayHandle;
+        }
+
+        function changeAdminSupportLink() {
+            const newLink = prompt("اكتب معرّف أو رابط تلجرام الجديد للدعم الفني (مثال: https://t.me/your_username):", window.currentSupportLink);
+            if (newLink && newLink.trim() !== "") {
+                let formattedLink = newLink.trim();
+                if (!formattedLink.startsWith('http') && !formattedLink.startsWith('https')) {
+                    if (formattedLink.startsWith('@')) {
+                        formattedLink = 'https://t.me/' + formattedLink.replace('@', '');
+                    } else {
+                        formattedLink = 'https://t.me/' + formattedLink;
+                    }
+                }
+                localStorage.setItem('mazaya_support_telegram_link', formattedLink);
+                loadSavedSupportLink();
+                showCustomModal('تم التحديث', 'تم تغيير رابط الدعم الفني لجميع الطلاب بنجاح!', 'info');
+            }
+        }
+
+        // Switch Tabs (Register / Inquiry)
+        function switchStudentTab(tab) {
+            const regTab = document.getElementById('registrationTab');
+            const inqTab = document.getElementById('inquiryTab');
+            const regBtn = document.getElementById('tabRegisterBtn');
+            const inqBtn = document.getElementById('tabInquiryBtn');
+
+            if (tab === 'register') {
+                regTab.classList.remove('hidden');
+                inqTab.classList.add('hidden');
+                regBtn.className = "w-1/2 py-2.5 rounded-xl bg-amber-500 text-slate-950 font-black shadow transition";
+                inqBtn.className = "w-1/2 py-2.5 rounded-xl text-slate-400 hover:text-white transition";
+            } else {
+                regTab.classList.add('hidden');
+                inqTab.classList.remove('hidden');
+                inqBtn.className = "w-1/2 py-2.5 rounded-xl bg-amber-500 text-slate-950 font-black shadow transition";
+                regBtn.className = "w-1/2 py-2.5 rounded-xl text-slate-400 hover:text-white transition";
+            }
+        }
 
         function checkExistingRegistration() {
             const isRegistered = localStorage.getItem('mazaya_poster_registered');
@@ -536,7 +667,7 @@
                 const date = localStorage.getItem('mazaya_student_date') || new Date().toLocaleDateString('ar-IQ');
                 const category = localStorage.getItem('mazaya_student_category') || 'صورة تخرج';
 
-                document.getElementById('registrationFormCard').classList.add('hidden');
+                document.getElementById('registrationTab').classList.add('hidden');
                 document.getElementById('successTicketCard').classList.remove('hidden');
 
                 document.getElementById('ticketName').textContent = name;
@@ -648,7 +779,7 @@
             document.getElementById('previewContainer').classList.add('hidden');
         }
 
-        // Handle Form Submit to Cloud & Telegram
+        // Handle Form Submit (STRICT DUPLICATE NAME CHECK & DEFAULT STATUS PENDING)
         async function handleFormSubmit(event) {
             event.preventDefault();
 
@@ -661,6 +792,21 @@
                 return;
             }
 
+            // 1. Check duplicate name in Cloud
+            const normalizedNewName = studentName.replace(/\s+/g, ' ').toLowerCase();
+            const isDuplicate = (window.cloudStudents || []).some(s => 
+                s.name && s.name.replace(/\s+/g, ' ').toLowerCase() === normalizedNewName
+            );
+
+            if (isDuplicate) {
+                showCustomModal(
+                    'الاسم مسجل مسبقاً! ⚠️', 
+                    `عذراً، الاسم (${studentName}) تم تسجيله مسبقاً في السحاب ولا يمكن تكراره.\n\nإذا واجهتك مشكلة تواصل مع الدعم الفني للإدارة.`, 
+                    'error'
+                );
+                return;
+            }
+
             if (!compressedImageBlob) {
                 showCustomModal('تنبيه الصورة', 'يرجى اختيار الصورة أولاً.', 'warning');
                 return;
@@ -669,12 +815,13 @@
             const submitBtn = document.getElementById('submitBtn');
             const btnText = document.getElementById('btnText');
             submitBtn.disabled = true;
-            btnText.textContent = 'جاري الحفظ في السحاب والإرسال...';
+            btnText.textContent = 'جاري إرسال الصورة للتدقيق...';
 
             const registrationSerial = '#' + Math.floor(100000 + Math.random() * 900000);
             const now = new Date();
             const dateFormatted = now.toLocaleDateString('ar-IQ') + ' | ' + now.toLocaleTimeString('ar-IQ', { hour: '2-digit', minute: '2-digit' });
 
+            // Default Status: PENDING (قيد المراجعة والتدقيق)
             const studentObj = {
                 name: studentName,
                 type: photoType,
@@ -682,23 +829,24 @@
                 serial: registrationSerial,
                 date: dateFormatted,
                 image: compressedDataBase64,
+                status: 'PENDING',
                 createdAt: Date.now()
             };
 
             try {
-                // 1. Save to Cloud Firestore
+                // Save to Cloud
                 await window.saveStudentToCloud(studentObj);
 
-                // 2. Send to Telegram
+                // Send to Telegram
                 const captionText = 
-`🎓 *طالب جديد في السحاب والبوستر!*
+`🎓 *طلب صورة تخرج جديد (قيد التدقيق)!*
 ━━━━━━━━━━━━━━━━━━
-🏛 *الكلية:* كلية مزايا الجامعة (جروب B)
+🏛 *الكلية:* كلية مزايا الجامعة (كروب B)
 ✨ *الدفعة:* To Be Not To Be
 👤 *الاسم:* ${studentName}
 🏷 *النوع:* ${photoType}
 💬 *ملاحظة:* ${studentNote}
-🔢 *الرقم:* \`${registrationSerial}\`
+🔢 *الرقم التسلسلي الخفي:* \`${registrationSerial}\`
 ⏰ *التاريخ:* ${dateFormatted}
 ━━━━━━━━━━━━━━━━━━`;
 
@@ -713,7 +861,7 @@
                     body: formData
                 });
 
-                // Local Storage Flag
+                // Local Storage
                 localStorage.setItem('mazaya_poster_registered', 'true');
                 localStorage.setItem('mazaya_student_name', studentName);
                 localStorage.setItem('mazaya_student_serial', registrationSerial);
@@ -725,14 +873,107 @@
 
             } catch (err) {
                 console.error(err);
-                showCustomModal('تم التسجيل محلياً', 'تم حفظ تسجيلك بنجاح!', 'info');
+                showCustomModal('تم التسجيل', 'تم إرسال بياناتك وصورتك بنجاح!', 'info');
             } finally {
                 submitBtn.disabled = false;
                 btnText.textContent = 'إرسال الصورة وحفظ التسجيل';
             }
         }
 
-        // Admin Access & Password Controls
+        // Student Inquiry Search Function (STRICTLY BY SERIAL NUMBER ONLY - SEARCH BY NAME IS COMPLETELY DISABLED)
+        function searchStudentBySerialOnly() {
+            const rawQuery = document.getElementById('inquiryInput').value.trim();
+            const resultArea = document.getElementById('searchResultArea');
+            resultArea.classList.remove('hidden');
+
+            if (!rawQuery) {
+                resultArea.innerHTML = `
+                    <div class="p-4 bg-red-500/10 border border-red-500/30 rounded-xl text-center text-red-400 text-xs font-bold">
+                        <i class="fa-solid fa-triangle-exclamation ml-1"></i> حقل البحث فارغ! يرجى إدخال الرقم التسلسلي الخاص بك (مثال: #123456).
+                    </div>
+                `;
+                return;
+            }
+
+            // Clean query: remove spaces
+            let query = rawQuery.toLowerCase().replace(/\s+/g, '');
+            if (!query.startsWith('#')) {
+                query = '#' + query;
+            }
+
+            // Check if query is actually a number-based serial code (e.g., #123456)
+            // If user typed words/letters (Name search attempt), reject immediately for privacy!
+            const isDigitSerial = /^#[0-9]{5,8}$/.test(query);
+
+            if (!isDigitSerial) {
+                resultArea.innerHTML = `
+                    <div class="bg-slate-900/90 border border-amber-500/40 rounded-2xl p-4 text-center space-y-2">
+                        <i class="fa-solid fa-shield-halved text-amber-400 text-3xl"></i>
+                        <p class="text-xs font-bold text-amber-300">البحث بالاسم ملغى نهائياً لحماية الخصوصية!</p>
+                        <p class="text-[11px] text-slate-300 leading-relaxed">
+                            تأكد من إدخال **الرقم التسلسلي** المكون من أرقام فقط والذي ظهر لك بعد التسجيل (مثال: <span class="font-mono text-amber-300">#849201</span>).
+                        </p>
+                    </div>
+                `;
+                return;
+            }
+
+            const list = window.cloudStudents || [];
+            
+            // STRICT MATCH ONLY WITH SERIAL NUMBER (NO NAME SEARCH ALLOWED)
+            const found = list.find(s => s.serial && s.serial.toLowerCase().trim() === query);
+
+            if (found) {
+                let statusBadge = '';
+                let statusMessage = '';
+
+                if (found.status === 'APPROVED') {
+                    statusBadge = `<span class="text-xs bg-emerald-500/20 text-emerald-400 font-bold px-3 py-1 rounded-full border border-emerald-500/30"><i class="fa-solid fa-circle-check ml-1"></i> تم القبول والاعتماد الرسمي ✅</span>`;
+                    statusMessage = `<p class="text-xs text-emerald-300 font-semibold">مبارك! صورتك معتمدة رسمياً ومدرجة ضمن بوستر التخرج النهائي للدفعة.</p>`;
+                } else if (found.status === 'REJECTED') {
+                    statusBadge = `<span class="text-xs bg-red-500/20 text-red-400 font-bold px-3 py-1 rounded-full border border-red-500/30"><i class="fa-solid fa-circle-xmark ml-1"></i> الطلب مرفوض ❌</span>`;
+                    statusMessage = `
+                        <div class="p-2.5 bg-red-500/10 border border-red-500/30 rounded-xl text-xs text-red-300 space-y-1">
+                            <div><strong>سبب الرفض:</strong> ${found.rejectionReason || 'الصورة غير واضحة أو مخالفة للتعليمات'}.</div>
+                            <div class="text-[11px] text-slate-400">تواصل مع الدعم الفني لإلغاء القيد وإعادة رفع صورة جديدة.</div>
+                        </div>
+                    `;
+                } else {
+                    statusBadge = `<span class="text-xs bg-amber-500/20 text-amber-400 font-bold px-3 py-1 rounded-full border border-amber-500/30"><i class="fa-solid fa-hourglass-half ml-1"></i> قيد المراجعة والتدقيق ⏳</span>`;
+                    statusMessage = `<p class="text-xs text-amber-300 font-semibold">طلبك وصل بنجاح وجاري تدقيق الصورة من قبل مسؤول البوستر.</p>`;
+                }
+
+                resultArea.innerHTML = `
+                    <div class="bg-slate-900/90 border border-slate-700/80 rounded-2xl p-4 text-right space-y-3 shadow-xl">
+                        <div class="flex justify-between items-center border-b border-slate-800 pb-2.5">
+                            <div>${statusBadge}</div>
+                            <span class="text-xs font-mono font-bold bg-slate-800 px-2.5 py-1 rounded text-amber-300">${found.serial}</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <img src="${found.image}" class="w-14 h-14 rounded-xl object-cover border border-amber-500 shadow">
+                            <div>
+                                <h4 class="text-sm font-bold text-white">${found.name}</h4>
+                                <p class="text-xs text-slate-400 mt-0.5">${found.type} &bull; ${found.date}</p>
+                            </div>
+                        </div>
+                        ${statusMessage}
+                    </div>
+                `;
+            } else {
+                resultArea.innerHTML = `
+                    <div class="bg-slate-900/90 border border-red-500/30 rounded-2xl p-4 text-center space-y-3">
+                        <i class="fa-solid fa-key text-red-400 text-3xl"></i>
+                        <p class="text-xs font-bold text-slate-200">الرقم التسلسلي غير صحيح أو لم يُسجل بعد!</p>
+                        <p class="text-[11px] text-slate-400">تأكد من كتابة الرمز بدقة مع العلامة (#). إذا نسيت رقمك، تواصل مع الدعم الفني.</p>
+                        <a href="${window.currentSupportLink}" target="_blank" class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs transition shadow">
+                            <i class="fa-brands fa-telegram"></i> مراسلة مسؤول الدعم
+                        </a>
+                    </div>
+                `;
+            }
+        }
+
+        // Admin Access & Controls
         function requestAdminAccess() {
             if (window.isAdminLoggedIn) {
                 exitAdminView();
@@ -771,7 +1012,7 @@
             checkExistingRegistration();
         }
 
-        // Render Admin Table from Cloud Database
+        // Render Admin Table with Approve / Reject Controls
         window.renderAdminTable = function() {
             const tbody = document.getElementById('studentsTableBody');
             const emptyState = document.getElementById('emptyState');
@@ -781,16 +1022,25 @@
             tbody.innerHTML = '';
 
             const list = window.cloudStudents || [];
+            
+            // Statistics Update
+            document.getElementById('statTotal').textContent = list.length;
+            document.getElementById('statApproved').textContent = list.filter(s => s.status === 'APPROVED').length;
+            document.getElementById('statPending').textContent = list.filter(s => !s.status || s.status === 'PENDING').length;
+            document.getElementById('statRejected').textContent = list.filter(s => s.status === 'REJECTED').length;
+
             const filtered = list.filter(s => {
                 const name = s.name || '';
                 const serial = s.serial || '';
-                const matchesName = name.toLowerCase().includes(searchVal) || serial.toLowerCase().includes(searchVal);
-                const matchesType = filterVal === 'ALL' || s.type === filterVal;
-                return matchesName && matchesType;
-            });
+                const matchesSearch = name.toLowerCase().includes(searchVal) || serial.toLowerCase().includes(searchVal);
+                
+                let matchesFilter = true;
+                if (filterVal === 'APPROVED') matchesFilter = s.status === 'APPROVED';
+                if (filterVal === 'PENDING') matchesFilter = !s.status || s.status === 'PENDING';
+                if (filterVal === 'REJECTED') matchesFilter = s.status === 'REJECTED';
 
-            document.getElementById('statTotal').textContent = list.length;
-            document.getElementById('statGrad').textContent = list.filter(s => s.type === 'صورة تخرج حديثة').length;
+                return matchesSearch && matchesFilter;
+            });
 
             if (filtered.length === 0) {
                 emptyState.classList.remove('hidden');
@@ -802,23 +1052,37 @@
             filtered.forEach((student, index) => {
                 const tr = document.createElement('tr');
                 tr.className = 'hover:bg-slate-800/40 transition border-b border-slate-800/60';
+                
+                let statusBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30">قيد التدقيق ⏳</span>`;
+                if (student.status === 'APPROVED') {
+                    statusBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">مقبول ✅</span>`;
+                } else if (student.status === 'REJECTED') {
+                    statusBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-red-500/20 text-red-400 border border-red-500/30">مرفوض ❌</span>`;
+                }
+
                 tr.innerHTML = `
                     <td class="p-3.5 font-bold text-slate-500">${index + 1}</td>
                     <td class="p-3.5">
-                        <img src="${student.image}" alt="${student.name}" class="w-10 h-10 rounded-lg object-cover border border-amber-500/40">
+                        <img src="${student.image}" alt="${student.name}" class="w-10 h-10 rounded-lg object-cover border border-amber-500/40 shadow">
                     </td>
                     <td class="p-3.5 font-bold text-white">${student.name}</td>
-                    <td class="p-3.5">
-                        <span class="px-2.5 py-1 rounded-full text-[11px] font-bold ${student.type && student.type.includes('صغر') ? 'bg-amber-500/10 text-amber-400 border border-amber-500/30' : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'}">
-                            ${student.type || 'صورة عامة'}
-                        </span>
-                    </td>
-                    <td class="p-3.5 font-mono text-slate-300">${student.serial}</td>
-                    <td class="p-3.5 text-xs text-slate-400">${student.date}</td>
+                    <td class="p-3.5 text-xs text-slate-300">${student.type || 'صورة عامة'}</td>
+                    <td class="p-3.5 font-mono text-amber-300 text-xs">${student.serial}</td>
+                    <td class="p-3.5">${statusBadge}</td>
                     <td class="p-3.5 text-center">
-                        <div class="flex items-center justify-center gap-2">
-                            <button onclick="downloadStudentPDF('${student.id}')" title="تحميل PDF" class="px-2.5 py-1.5 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 rounded-lg text-xs font-bold transition">
-                                <i class="fa-solid fa-file-pdf ml-1"></i> PDF
+                        <div class="flex items-center justify-center gap-1.5">
+                            <button onclick="approveStudentAdmin('${student.id}')" title="موافقة" class="px-2 py-1 bg-emerald-600/30 hover:bg-emerald-600 text-emerald-300 hover:text-white border border-emerald-500/40 rounded-lg text-xs font-bold transition">
+                                موافقة ✅
+                            </button>
+                            <button onclick="rejectStudentAdmin('${student.id}')" title="رفض" class="px-2 py-1 bg-red-600/30 hover:bg-red-600 text-red-300 hover:text-white border border-red-500/40 rounded-lg text-xs font-bold transition">
+                                رفض ❌
+                            </button>
+                        </div>
+                    </td>
+                    <td class="p-3.5 text-center">
+                        <div class="flex items-center justify-center gap-1.5">
+                            <button onclick="downloadStudentPDF('${student.id}')" title="تحميل PDF" class="p-1.5 bg-slate-800 hover:bg-slate-700 text-amber-300 rounded-lg border border-slate-600 text-xs transition">
+                                <i class="fa-solid fa-file-pdf"></i>
                             </button>
                             <button onclick="deleteStudentCloud('${student.id}')" title="حذف" class="p-1.5 text-red-400 hover:bg-red-500/20 rounded-lg transition">
                                 <i class="fa-solid fa-trash"></i>
@@ -830,7 +1094,21 @@
             });
         };
 
-        // Export All Database Records to Excel
+        // Approval & Rejection Actions
+        window.approveStudentAdmin = async function(docId) {
+            await window.updateStudentStatusInCloud(docId, 'APPROVED');
+            showCustomModal('تمت الموافقة', 'تمت الموافقة على الطلب واعتُمدت صورة الطالب رسمياً!', 'info');
+        };
+
+        window.rejectStudentAdmin = async function(docId) {
+            const reason = prompt("اكتب سبب الرفض ليظهر للطالب عند الاستعلام (اختياري):", "الصورة غير واضحة أو مخالفة للتعليمات");
+            if (reason !== null) {
+                await window.updateStudentStatusInCloud(docId, 'REJECTED', reason);
+                showCustomModal('تم الرفض', 'تم تعديل حالة الطلب إلى مرفوض وتحديد السبب.', 'warning');
+            }
+        };
+
+        // Export Excel
         window.exportToExcel = function() {
             const list = window.cloudStudents || [];
             if (list.length === 0) {
@@ -843,6 +1121,7 @@
                 'الاسم الثلاثي واللقب': s.name,
                 'نوع الصورة': s.type,
                 'الرقم التسلسلي': s.serial,
+                'حالة القبول': s.status === 'APPROVED' ? 'مقبول' : (s.status === 'REJECTED' ? 'مرفوض' : 'قيد التدقيق'),
                 'تاريخ التسجيل': s.date,
                 'الملاحظة / الإهداء': s.note || 'لا يوجد'
             }));
@@ -856,6 +1135,7 @@
                 { wch: 30 },
                 { wch: 20 },
                 { wch: 15 },
+                { wch: 15 },
                 { wch: 25 },
                 { wch: 30 }
             ];
@@ -863,7 +1143,7 @@
             XLSX.writeFile(workbook, `سجل_طلاب_كلية_مزايا_دفعة_2026.xlsx`);
         };
 
-        // Download PDF with Student Photo and QR Code
+        // Download PDF
         window.downloadStudentPDF = function(docId) {
             const student = window.cloudStudents.find(s => s.id === docId);
             if (!student) return;
@@ -900,7 +1180,7 @@
         };
 
         window.deleteStudentCloud = async function(docId) {
-            if (confirm('هل أنت تأكد من إزالة هذا الطالب من السحاب؟')) {
+            if (confirm('هل أنت تأكد من إزالة هذا الطالب من السحاب نهائياً؟')) {
                 await window.deleteStudentFromCloud(docId);
             }
         };

@@ -68,10 +68,10 @@
 <body class="flex flex-col justify-between min-h-screen p-3 sm:p-6 max-w-full overflow-x-hidden">
 
     <!-- Top Navigation Bar -->
-    <nav class="w-full max-w-6xl mx-auto flex justify-between items-center mb-4 px-1 sm:px-2">
+    <nav class="w-full max-w-6xl mx-auto flex justify-between items-center mb-3 px-1 sm:px-2">
         <div class="flex items-center gap-2">
             <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-            <span class="text-[11px] sm:text-xs font-bold text-slate-300">Firebase (tobe-23866) متصل ✅</span>
+            <span class="text-[11px] sm:text-xs font-bold text-slate-300">Firebase متصل ✅</span>
         </div>
         
         <div class="flex items-center gap-1.5 sm:gap-2">
@@ -90,6 +90,15 @@
             </button>
         </div>
     </nav>
+
+    <!-- Broadcast Announcement Banner (Controlled by Admin) -->
+    <div id="broadcastBanner" class="hidden w-full max-w-xl mx-auto mb-3 bg-gradient-to-r from-amber-500/20 via-amber-400/30 to-amber-500/20 border border-amber-500/50 rounded-2xl p-3 text-right text-xs text-amber-200 flex items-center gap-2.5 shadow-lg animate-pulse">
+        <i class="fa-solid fa-bullhorn text-amber-400 text-base flex-shrink-0"></i>
+        <div class="flex-1">
+            <span class="font-bold text-amber-300 block">تنبيه إداري عاجل للدفعة:</span>
+            <span id="broadcastMessageText" class="text-slate-200">---</span>
+        </div>
+    </div>
 
     <!-- ================================================================= -->
     <!-- SECTION 1: STUDENT WEBSITE (واجهة الطلاب)                        -->
@@ -110,8 +119,8 @@
             </p>
         </header>
 
-        <!-- Progress Bar Indicator -->
-        <div class="glass-card rounded-2xl p-3 px-4 border border-slate-700/80 space-y-2">
+        <!-- Progress Bar & Countdown Indicator -->
+        <div class="glass-card rounded-2xl p-3 px-4 border border-slate-700/80 space-y-2.5">
             <div class="flex justify-between items-center text-xs font-bold">
                 <span class="text-amber-300 flex items-center gap-1.5">
                     <i class="fa-solid fa-chart-line"></i> نسبة اكتمال بوستر الدفعة:
@@ -120,6 +129,12 @@
             </div>
             <div class="w-full bg-slate-800 rounded-full h-3 overflow-hidden border border-slate-700">
                 <div id="progressBarFill" class="bg-gradient-to-r from-amber-500 via-emerald-400 to-emerald-500 h-full w-0 transition-all duration-700 rounded-full"></div>
+            </div>
+
+            <!-- Countdown Timer Row -->
+            <div class="flex justify-between items-center border-t border-slate-800/80 pt-2 text-[11px] text-slate-400">
+                <span class="flex items-center gap-1"><i class="fa-solid fa-clock text-amber-400"></i> متبقي على إغلاق البوستر:</span>
+                <span id="countdownDisplay" class="font-mono text-amber-300 font-bold bg-slate-900/90 px-2 py-0.5 rounded border border-slate-700">جاري التقدير...</span>
             </div>
         </div>
 
@@ -357,7 +372,7 @@
 
     </div>
 
-    <!-- Story Card Preview Modal -->
+    <!-- Story Card Preview Modal with Theme Selector -->
     <div id="storyPreviewModal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-50 hidden flex items-center justify-center p-3 sm:p-5 overflow-y-auto">
         <div class="glass-card border border-amber-500/40 rounded-3xl max-w-sm w-full p-4 text-center space-y-4 shadow-2xl my-auto">
             <div class="flex justify-between items-center border-b border-slate-800 pb-2.5">
@@ -369,15 +384,19 @@
                 </button>
             </div>
 
-            <!-- Rendered Story Image Preview -->
-            <div class="relative bg-slate-950 rounded-2xl p-1 border border-amber-500/30 shadow-inner">
-                <img id="renderedStoryImage" src="" alt="بطاقة التخرج كـ Story" class="w-full rounded-xl object-contain max-h-[55vh] mx-auto shadow-2xl">
+            <!-- Story Theme Selector Buttons -->
+            <div class="space-y-1">
+                <span class="text-[11px] text-slate-400 font-bold block text-right">اختر ثيم تصميم البطاقة:</span>
+                <div class="grid grid-cols-3 gap-1.5 text-[10px] font-bold">
+                    <button onclick="changeStoryTheme('gold')" id="themeGoldBtn" class="py-1.5 bg-amber-500/30 border border-amber-500 text-amber-300 rounded-lg">👑 الذهبي الملكي</button>
+                    <button onclick="changeStoryTheme('blue')" id="themeBlueBtn" class="py-1.5 bg-slate-800 border border-slate-700 text-slate-400 rounded-lg">💎 الماسي الأزرق</button>
+                    <button onclick="changeStoryTheme('purple')" id="themePurpleBtn" class="py-1.5 bg-slate-800 border border-slate-700 text-slate-400 rounded-lg">🎓 الفاخر الملكي</button>
+                </div>
             </div>
 
-            <!-- Helpful Mobile Instruction -->
-            <div class="bg-amber-500/10 border border-amber-500/30 rounded-xl p-2.5 text-[11px] text-amber-300 text-right leading-relaxed">
-                💡 <strong>طريقة التنزيل المباشرة:</strong>
-                <p class="mt-0.5 text-slate-300">اضغط على زر التنزيل بالأسفل، أو **اضغط مطولاً على الصورة** واختر (حفظ الصورة / Save Image) لتنزل فوراً في الاستوديو.</p>
+            <!-- Rendered Story Image Preview -->
+            <div class="relative bg-slate-950 rounded-2xl p-1 border border-amber-500/30 shadow-inner">
+                <img id="renderedStoryImage" src="" alt="بطاقة التخرج كـ Story" class="w-full rounded-xl object-contain max-h-[50vh] mx-auto shadow-2xl">
             </div>
 
             <!-- Action Controls -->
@@ -387,6 +406,37 @@
                 </button>
                 <button onclick="openStoryInNewTab()" class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded-xl text-xs transition border border-slate-700">
                     <i class="fa-solid fa-up-right-from-square ml-1"></i> فتح الصورة بنقرة كاملة
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Re-Upload Photo Modal (When Status is Rejected/Pending) -->
+    <div id="reuploadModal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+        <div class="glass-card border border-amber-500/40 rounded-3xl max-w-md w-full p-5 text-right space-y-4 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+                <h4 class="text-sm font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-arrows-rotate text-gold"></i> استبدال وتعديل صورة الطالب
+                </h4>
+                <button onclick="closeReuploadModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <div class="space-y-2">
+                <p class="text-xs text-slate-300">قم باختيار صورة جديدة واضحة لاستبدال الصورة السابقة مع الاحتفاظ بالرقم التسلسلي نفسه:</p>
+                <div onclick="document.getElementById('reuploadPhotoInput').click()" 
+                     class="border-2 border-dashed border-slate-600 hover:border-gold rounded-2xl p-4 text-center cursor-pointer bg-slate-900/60">
+                    <input type="file" id="reuploadPhotoInput" accept="image/*" class="hidden" onchange="processReuploadImage(event)">
+                    <p class="text-xs font-bold text-slate-200"><i class="fa-solid fa-upload text-gold ml-1"></i> اضغط لاختيار صورة جديدة</p>
+                </div>
+                <img id="reuploadPreview" src="#" class="hidden max-h-40 mx-auto rounded-xl border border-gold shadow mt-2">
+            </div>
+
+            <div class="flex gap-2 pt-2">
+                <button onclick="submitReuploadImage()" id="reuploadSubmitBtn" class="w-full py-2.5 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold rounded-xl text-xs transition">
+                    تأكيد وتحديث الصورة 🚀
+                </button>
+                <button onclick="closeReuploadModal()" class="w-full py-2.5 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-xl text-xs transition border border-slate-700">
+                    إلغاء
                 </button>
             </div>
         </div>
@@ -418,7 +468,39 @@
             </div>
         </div>
 
-        <!-- Admin View Sub-Tabs (Table / Poster Mockup / Quotes) -->
+        <!-- NEW: Dynamic Deadline Control Panel -->
+        <div class="glass-card rounded-2xl p-4 border border-amber-500/30 flex flex-col sm:flex-row justify-between items-center gap-3">
+            <div class="flex items-center gap-2 text-xs text-amber-300 font-bold">
+                <i class="fa-solid fa-clock text-amber-400 text-base"></i>
+                <span>تحديد تاريخ ووقت نهاية التقديم (العداد التنازلي):</span>
+            </div>
+            <div class="flex items-center gap-2 w-full sm:w-auto">
+                <input type="datetime-local" id="adminDeadlineInput" 
+                       class="w-full sm:w-auto py-2 px-3 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white outline-none focus:border-gold">
+                <button onclick="saveDeadlineDate()" class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold rounded-xl text-xs transition shadow flex-shrink-0">
+                    حفظ الموعد ⏰
+                </button>
+            </div>
+        </div>
+
+        <!-- Admin Broadcast Alert Controls -->
+        <div class="glass-card rounded-2xl p-4 space-y-2 border border-amber-500/30">
+            <div class="flex justify-between items-center">
+                <span class="text-xs font-bold text-amber-300 flex items-center gap-1.5">
+                    <i class="fa-solid fa-bullhorn text-amber-400"></i> إرسال شريط إعلانات وتنبيه عاجل لجميع الطلاب:
+                </span>
+                <button onclick="clearAdminBroadcast()" class="text-[11px] text-red-400 hover:text-red-300 font-bold">مسح التنبيه</button>
+            </div>
+            <div class="flex gap-2">
+                <input type="text" id="adminBroadcastInput" placeholder="اكتب التنبيه العاجل هنا (مثال: متبقي 24 ساعة فقط على إغلاق التسجيل)..." 
+                       class="w-full py-2 px-3 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white outline-none focus:border-gold">
+                <button onclick="saveAdminBroadcast()" class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold rounded-xl text-xs transition shadow flex-shrink-0">
+                    نشر التنبيه 📢
+                </button>
+            </div>
+        </div>
+
+        <!-- Admin View Sub-Tabs -->
         <div class="flex rounded-2xl bg-slate-900/90 p-1 border border-slate-800 text-xs sm:text-sm font-bold">
             <button id="adminSubTabTableBtn" onclick="switchAdminSubTab('table')" class="w-1/3 py-2.5 rounded-xl bg-amber-500 text-slate-950 font-black transition">
                 <i class="fa-solid fa-table-list ml-1"></i> جدول الطلاب المباشر
@@ -454,7 +536,7 @@
                 </div>
             </div>
 
-            <!-- Action Control Bar -->
+            <!-- Action Control Bar with Multi-Select Actions -->
             <div class="glass-card rounded-2xl p-4 flex flex-col md:flex-row gap-3 justify-between items-center max-w-full overflow-hidden">
                 
                 <!-- Search & Filter -->
@@ -472,13 +554,16 @@
                     </select>
                 </div>
 
-                <!-- Export Action Buttons -->
+                <!-- Batch Action Buttons & Exports -->
                 <div class="flex flex-wrap items-center gap-2 w-full md:w-auto justify-end">
+                    <button onclick="batchApproveSelected()" class="px-3 py-2 bg-emerald-600/40 hover:bg-emerald-600 text-emerald-300 hover:text-white border border-emerald-500/40 rounded-xl text-xs font-bold transition flex items-center gap-1 shadow">
+                        <i class="fa-solid fa-check-double"></i> موافقة جماعية
+                    </button>
                     <button onclick="exportToExcel()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow">
-                        <i class="fa-solid fa-file-excel"></i> تصدير إكسل ملون
+                        <i class="fa-solid fa-file-excel"></i> إكسل ملون
                     </button>
                     <button onclick="exportBulkApprovedPDF()" class="px-3.5 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow">
-                        <i class="fa-solid fa-file-pdf"></i> تصدير PDF موحّد لكل الاستمارات
+                        <i class="fa-solid fa-file-pdf"></i> PDF موحّد
                     </button>
                     <button onclick="exitAdminView()" class="px-3 py-2 bg-red-900/50 hover:bg-red-800 text-red-300 rounded-xl text-xs font-bold border border-red-700 transition">
                         خروج
@@ -492,6 +577,7 @@
                     <table class="w-full text-right text-xs sm:text-sm text-slate-300">
                         <thead class="bg-slate-900/90 text-slate-400 font-bold border-b border-slate-800">
                             <tr>
+                                <th class="p-3.5 text-center"><input type="checkbox" id="selectAllCheckbox" onchange="toggleSelectAllRows(this)"></th>
                                 <th class="p-3.5">#</th>
                                 <th class="p-3.5">الصورة</th>
                                 <th class="p-3.5">الاسم الثلاثي</th>
@@ -530,6 +616,22 @@
                 </span>
             </div>
 
+            <!-- Categories Analytics Cards -->
+            <div class="grid grid-cols-3 gap-2 text-center text-xs">
+                <div class="bg-slate-900/80 p-2.5 rounded-xl border border-slate-800">
+                    <span class="text-slate-400 block">👶 الطفولة</span>
+                    <span id="analyticsChildCount" class="font-bold text-amber-300">0</span>
+                </div>
+                <div class="bg-slate-900/80 p-2.5 rounded-xl border border-slate-800">
+                    <span class="text-slate-400 block">🎓 حديثة</span>
+                    <span id="analyticsGradCount" class="font-bold text-emerald-400">0</span>
+                </div>
+                <div class="bg-slate-900/80 p-2.5 rounded-xl border border-slate-800">
+                    <span class="text-slate-400 block">📸 كاجوال</span>
+                    <span id="analyticsCasualCount" class="font-bold text-blue-400">0</span>
+                </div>
+            </div>
+
             <div id="posterGridContainer" class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-3 pt-2">
                 <!-- Dynamic Poster Grid Items -->
             </div>
@@ -560,7 +662,7 @@
     <!-- Hidden Canvas for Story Generation -->
     <canvas id="storyCanvas" width="1080" height="1920"></canvas>
 
-    <!-- Isolated Fixed Wrappers For PDF Generation (Zero layout impact to prevent page wobble) -->
+    <!-- Isolated Fixed Wrappers For PDF Generation -->
     <div style="position: fixed; top: 0; left: -9999px; width: 1px; height: 1px; overflow: hidden; pointer-events: none; z-index: -9999; opacity: 0;">
         <div id="pdfCardTemplate" style="width: 1122px; height: 793px; padding: 40px; background: #ffffff; color: #0f172a; font-family: 'Cairo', sans-serif; direction: rtl; box-sizing: border-box; border: 10px solid #D4AF37; display: flex; flex-direction: column; justify-content: space-between;">
             <!-- PDF Header -->
@@ -743,6 +845,7 @@
         window.db = db;
         window.cloudStudents = [];
         window.isFormOpenGlobal = true;
+        window.globalDeadlineISO = '2027-04-15T23:59'; // Default Deadline
 
         async function initAuth() {
             try {
@@ -772,18 +875,36 @@
             console.error("Firestore error:", error);
         });
 
-        // Listen to Form Settings (Open/Closed)
+        // Listen to Form Settings (Open/Closed & Deadline Date)
         const configRef = doc(db, 'poster_config', 'settings');
         onSnapshot(configRef, (docSnap) => {
             if (docSnap.exists()) {
                 const data = docSnap.data();
                 window.isFormOpenGlobal = data.isFormOpen !== false;
+                if (data.deadlineISO) {
+                    window.globalDeadlineISO = data.deadlineISO;
+                    const dateInput = document.getElementById('adminDeadlineInput');
+                    if (dateInput) dateInput.value = data.deadlineISO;
+                }
             } else {
                 window.isFormOpenGlobal = true;
             }
             window.applyFormOpenStateUI();
         }, (err) => {
             console.error(err);
+        });
+
+        // Listen to Admin Broadcast Announcement
+        const annRef = doc(db, 'poster_config', 'announcement');
+        onSnapshot(annRef, (docSnap) => {
+            const banner = document.getElementById('broadcastBanner');
+            const textEl = document.getElementById('broadcastMessageText');
+            if (docSnap.exists() && docSnap.data().message) {
+                textEl.textContent = docSnap.data().message;
+                banner.classList.remove('hidden');
+            } else {
+                banner.classList.add('hidden');
+            }
         });
 
         window.saveStudentToCloud = async function(studentData) {
@@ -800,6 +921,15 @@
             });
         };
 
+        window.updateStudentPhotoInCloud = async function(docId, newBase64) {
+            const targetDoc = doc(db, 'poster_students', docId);
+            await updateDoc(targetDoc, {
+                image: newBase64,
+                status: 'PENDING',
+                rejectionReason: ''
+            });
+        };
+
         window.deleteStudentFromCloud = async function(docId) {
             const targetDoc = doc(db, 'poster_students', docId);
             await deleteDoc(targetDoc);
@@ -809,23 +939,84 @@
             const targetConfig = doc(db, 'poster_config', 'settings');
             await setDoc(targetConfig, { isFormOpen: newState }, { merge: true });
         };
+
+        window.saveDeadlineDateCloud = async function(isoString) {
+            const targetConfig = doc(db, 'poster_config', 'settings');
+            await setDoc(targetConfig, { deadlineISO: isoString }, { merge: true });
+        };
+
+        window.saveBroadcastToCloud = async function(msgText) {
+            const targetConfig = doc(db, 'poster_config', 'announcement');
+            await setDoc(targetConfig, { message: msgText }, { merge: true });
+        };
     </script>
 
     <!-- App Logic Script -->
     <script>
         let compressedImageBlob = null;
         let compressedDataBase64 = null;
+        let reuploadBase64 = null;
         let currentRotation = 0;
         let originalImageSrc = null;
         let pendingRejectDocId = null;
+        let pendingReuploadDocId = null;
         let currentGeneratedStoryDataUrl = null;
+        let selectedStoryTheme = 'gold';
 
         window.isAdminLoggedIn = false;
         window.currentSupportLink = 'https://t.me/li_b11';
 
         window.addEventListener('DOMContentLoaded', () => {
             checkExistingRegistration();
+            startCountdownTimer();
         });
+
+        // Dynamic Countdown Timer Logic
+        function startCountdownTimer() {
+            setInterval(() => {
+                // Read from dynamic variable or fallback date
+                const targetIso = window.globalDeadlineISO || '2027-04-15T23:59';
+                const targetDate = new Date(targetIso).getTime();
+                const now = new Date().getTime();
+                const diff = targetDate - now;
+
+                if (isNaN(targetDate) || diff <= 0) {
+                    document.getElementById('countdownDisplay').textContent = "انتهى الموعد المحدد";
+                    return;
+                }
+                const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                const secs = Math.floor((diff % (1000 * 60)) / 1000);
+
+                document.getElementById('countdownDisplay').textContent = `${days} يوم و ${hours} ساعة و ${mins} دقيقة و ${secs} ثانية`;
+            }, 1000);
+        }
+
+        // Save Deadline Action from Admin Panel
+        function saveDeadlineDate() {
+            const isoVal = document.getElementById('adminDeadlineInput').value;
+            if (!isoVal) {
+                showCustomModal('تنبيه', 'يرجى اختيار تاريخ ووقت صحيح.', 'warning');
+                return;
+            }
+            window.saveDeadlineDateCloud(isoVal);
+            showCustomModal('تم حفظ الموعد', 'تم تحديث الموعد النهائي للبوستر بنجاح وتطبيقه على العداد التنازلي للطلاب! ⏰', 'info');
+        }
+
+        // Admin Broadcast Control Actions
+        function saveAdminBroadcast() {
+            const msg = document.getElementById('adminBroadcastInput').value.trim();
+            if (!msg) return;
+            window.saveBroadcastToCloud(msg);
+            showCustomModal('نشر التنبيه', 'تم نشر التنبيه العاجل بنجاح لجميع شاشات الطلاب.', 'info');
+        }
+
+        function clearAdminBroadcast() {
+            window.saveBroadcastToCloud('');
+            document.getElementById('adminBroadcastInput').value = '';
+            showCustomModal('مسح التنبيه', 'تم مسح التنبيه من شاشة الطلاب.', 'info');
+        }
 
         // Live Realtime Ticket Status Synchronization Function
         window.updateLiveTicketStatus = function() {
@@ -890,15 +1081,15 @@
                     headerSubEl.textContent = "تم مراجعة صورتك من قبل الإدارة وتبيّن أنها تحتاج تعديل";
                 }
                 if (bannerBoxEl) {
-                    bannerBoxEl.className = "p-3.5 bg-red-500/15 border-2 border-red-500/40 rounded-2xl text-right space-y-1.5";
+                    bannerBoxEl.className = "p-3.5 bg-red-500/15 border-2 border-red-500/40 rounded-2xl text-right space-y-2";
                     bannerBoxEl.innerHTML = `
                         <div class="flex items-center gap-2 text-red-300 font-bold text-xs sm:text-sm">
                             <i class="fa-solid fa-circle-exclamation text-red-400 text-base"></i>
                             سبب الرفض: ${reason}
                         </div>
-                        <p class="text-xs text-slate-200 leading-relaxed">
-                            يرجى التواصل مع الدعم الفني للإدارة (@li_b11) ليتم مسح قيدك وتتمكن من رفع صورة جديدة صحيحة.
-                        </p>
+                        <button onclick="openReuploadModal('${found.id}')" class="w-full py-2 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold rounded-xl text-xs transition shadow flex items-center justify-center gap-1.5">
+                            <i class="fa-solid fa-arrow-up-from-bracket"></i> اضغط هنا لاستبدال ورفع صورة جديدة الآن
+                        </button>
                     `;
                 }
             } else {
@@ -919,9 +1110,9 @@
                 if (bannerBoxEl) {
                     bannerBoxEl.className = "p-3.5 bg-amber-500/15 border-2 border-amber-500/40 rounded-2xl text-right space-y-2";
                     bannerBoxEl.innerHTML = `
-                        <div class="flex items-center gap-2 text-amber-300 font-bold text-xs sm:text-sm">
-                            <i class="fa-solid fa-triangle-exclamation text-amber-400 text-base"></i>
-                            تنبيه هام جداً: قم باحتفاظ وتصوير هذه الشاشة!
+                        <div class="flex items-center justify-between text-amber-300 font-bold text-xs sm:text-sm">
+                            <span class="flex items-center gap-1.5"><i class="fa-solid fa-triangle-exclamation text-amber-400 text-base"></i> تنبيه: احفظ رقمك التسلسلي!</span>
+                            <button onclick="openReuploadModal('${found.id}')" class="text-[11px] underline text-amber-300 hover:text-white">تغيير الصورة</button>
                         </div>
                         <p class="text-xs text-slate-300 leading-relaxed">
                             احفظ **الرقم التسلسلي** الموضح أدناه، لأنك ستحتاجه حصرياً لمعرفة هل قُبلت صورتك أم رُفضت من تبويب الاستعلام.
@@ -1070,7 +1261,6 @@
                 let width = img.width;
                 let height = img.height;
 
-                // Max 800px ensures base64 string is lightweight and well under Firestore 1MB limit
                 const MAX_WIDTH = 800;
                 const MAX_HEIGHT = 800;
 
@@ -1108,7 +1298,6 @@
                 let quality = 0.70;
                 compressedDataBase64 = canvas.toDataURL('image/jpeg', quality);
 
-                // Additional loop guard to strictly keep base64 < 650KB
                 while (compressedDataBase64.length > 650000 && quality > 0.3) {
                     quality -= 0.1;
                     compressedDataBase64 = canvas.toDataURL('image/jpeg', quality);
@@ -1144,7 +1333,66 @@
             document.getElementById('previewContainer').classList.add('hidden');
         }
 
-        // Handle Form Submit with Decoupled Fallback Safety
+        // Re-upload Photo Logic
+        function openReuploadModal(docId) {
+            pendingReuploadDocId = docId;
+            reuploadBase64 = null;
+            document.getElementById('reuploadPreview').classList.add('hidden');
+            document.getElementById('reuploadPhotoInput').value = '';
+            document.getElementById('reuploadModal').classList.remove('hidden');
+        }
+
+        function closeReuploadModal() {
+            document.getElementById('reuploadModal').classList.add('hidden');
+            pendingReuploadDocId = null;
+        }
+
+        function processReuploadImage(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    let width = img.width;
+                    let height = img.height;
+                    const MAX = 800;
+                    if (width > height) { if (width > MAX) { height *= MAX / width; width = MAX; } }
+                    else { if (height > MAX) { width *= MAX / height; height = MAX; } }
+                    canvas.width = width; canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+                    reuploadBase64 = canvas.toDataURL('image/jpeg', 0.70);
+                    const prevEl = document.getElementById('reuploadPreview');
+                    prevEl.src = reuploadBase64;
+                    prevEl.classList.remove('hidden');
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        async function submitReuploadImage() {
+            if (!pendingReuploadDocId || !reuploadBase64) {
+                showCustomModal('تنبيه', 'يرجى اختيار صورة جديدة أولاً.', 'warning');
+                return;
+            }
+            const btn = document.getElementById('reuploadSubmitBtn');
+            btn.disabled = true;
+            btn.textContent = 'جاري التحديث...';
+
+            await window.updateStudentPhotoInCloud(pendingReuploadDocId, reuploadBase64);
+            localStorage.setItem('mazaya_student_image', reuploadBase64);
+            
+            btn.disabled = false;
+            btn.textContent = 'تأكيد وتحديث الصورة 🚀';
+            closeReuploadModal();
+            showCustomModal('تم الاستبدال بنجاح', 'تمت إعادة إرسال صورتك الجديدة للإدارة للتدقيق والموافقة عليها!', 'info');
+        }
+
+        // Handle Form Submit
         async function handleFormSubmit(event) {
             event.preventDefault();
 
@@ -1162,7 +1410,6 @@
                 return;
             }
 
-            // Duplicate Name Check
             const normalizedNewName = studentName.replace(/\s+/g, ' ').toLowerCase();
             const isDuplicate = (window.cloudStudents || []).some(s => 
                 s.name && s.name.replace(/\s+/g, ' ').toLowerCase() === normalizedNewName
@@ -1202,14 +1449,12 @@
                 createdAt: Date.now()
             };
 
-            // Step 1: Save to Cloud
             try {
                 await window.saveStudentToCloud(studentObj);
             } catch (cloudErr) {
                 console.error("Cloud saving failed:", cloudErr);
             }
 
-            // Step 2: Send to Telegram Channel (Independent Safe Try/Catch)
             try {
                 const captionText = 
 `🎓 *طلب صورة تخرج جديد (دفعة 2027)!*
@@ -1237,7 +1482,6 @@
                 console.warn("Telegram API optional send notice:", tgErr);
             }
 
-            // Step 3: Local Storage Safe Save
             try {
                 localStorage.setItem('mazaya_poster_registered', 'true');
                 localStorage.setItem('mazaya_student_name', studentName);
@@ -1249,7 +1493,6 @@
                 console.warn("LocalStorage quota notice:", locErr);
             }
 
-            // Always complete submission transition
             confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
             checkExistingRegistration();
 
@@ -1257,7 +1500,6 @@
             btnText.textContent = 'إرسال الصورة وحفظ التسجيل';
         }
 
-        // Helper Image Loader with Promise for Canvas
         function loadImagePromise(src) {
             return new Promise((resolve, reject) => {
                 const img = new Image();
@@ -1268,7 +1510,15 @@
             });
         }
 
-        // Generate Instagram Story Share Card (1080x1920) with Modal Preview Fix
+        function changeStoryTheme(themeKey) {
+            selectedStoryTheme = themeKey;
+            document.getElementById('themeGoldBtn').className = themeKey === 'gold' ? 'py-1.5 bg-amber-500/30 border border-amber-500 text-amber-300 rounded-lg' : 'py-1.5 bg-slate-800 border border-slate-700 text-slate-400 rounded-lg';
+            document.getElementById('themeBlueBtn').className = themeKey === 'blue' ? 'py-1.5 bg-blue-500/30 border border-blue-500 text-blue-300 rounded-lg' : 'py-1.5 bg-slate-800 border border-slate-700 text-slate-400 rounded-lg';
+            document.getElementById('themePurpleBtn').className = themeKey === 'purple' ? 'py-1.5 bg-purple-500/30 border border-purple-500 text-purple-300 rounded-lg' : 'py-1.5 bg-slate-800 border border-slate-700 text-slate-400 rounded-lg';
+            generateAndDownloadStoryCard();
+        }
+
+        // Generate Story Share Card with Themes
         async function generateAndDownloadStoryCard() {
             let name = localStorage.getItem('mazaya_student_name') || 'طالب تخرج';
             let serial = (localStorage.getItem('mazaya_student_serial') || '566313').replace(/#/g, '');
@@ -1291,26 +1541,37 @@
             const canvas = document.getElementById('storyCanvas');
             const ctx = canvas.getContext('2d');
 
-            // Canvas Background Gradient
+            // Themes Color Palette
+            let primaryColor = '#D4AF37';
+            let bgStart = '#0b0f19';
+            let bgMid = '#1e1b4b';
+
+            if (selectedStoryTheme === 'blue') {
+                primaryColor = '#38BDF8';
+                bgStart = '#030712';
+                bgMid = '#0c4a6e';
+            } else if (selectedStoryTheme === 'purple') {
+                primaryColor = '#C084FC';
+                bgStart = '#090514';
+                bgMid = '#581c87';
+            }
+
             const grad = ctx.createLinearGradient(0, 0, 0, 1920);
-            grad.addColorStop(0, '#0b0f19');
-            grad.addColorStop(0.5, '#1e1b4b');
+            grad.addColorStop(0, bgStart);
+            grad.addColorStop(0.5, bgMid);
             grad.addColorStop(1, '#020617');
             ctx.fillStyle = grad;
             ctx.fillRect(0, 0, 1080, 1920);
 
-            // Gold Outer Border
-            ctx.strokeStyle = '#D4AF37';
+            ctx.strokeStyle = primaryColor;
             ctx.lineWidth = 16;
             ctx.strokeRect(35, 35, 1010, 1850);
 
-            // Inner Accent Border
-            ctx.strokeStyle = 'rgba(212, 175, 55, 0.4)';
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
             ctx.lineWidth = 4;
             ctx.strokeRect(55, 55, 970, 1810);
 
-            // Header Text
-            ctx.fillStyle = '#D4AF37';
+            ctx.fillStyle = primaryColor;
             ctx.font = 'bold 46px Cairo, sans-serif';
             ctx.textAlign = 'center';
             ctx.fillText('كلية مزايا الجامعة - قسم B', 540, 170);
@@ -1322,55 +1583,45 @@
             try {
                 const studentImg = await loadImagePromise(imgSrc);
 
-                // Draw Image Container
                 ctx.save();
-                ctx.strokeStyle = '#D4AF37';
+                ctx.strokeStyle = primaryColor;
                 ctx.lineWidth = 10;
                 ctx.strokeRect(190, 350, 700, 850);
 
                 ctx.fillStyle = '#0f172a';
                 ctx.fillRect(195, 355, 690, 840);
 
-                // Draw Student Image (Proportional Fit)
                 ctx.drawImage(studentImg, 200, 360, 680, 830);
                 ctx.restore();
 
-                // Details Card Box
                 ctx.fillStyle = 'rgba(15, 23, 42, 0.95)';
                 ctx.fillRect(140, 1260, 800, 420);
-                ctx.strokeStyle = 'rgba(212, 175, 55, 0.6)';
+                ctx.strokeStyle = primaryColor;
                 ctx.lineWidth = 4;
                 ctx.strokeRect(140, 1260, 800, 420);
 
-                // Student Name
                 ctx.fillStyle = '#FFFFFF';
                 ctx.font = 'bold 55px Cairo, sans-serif';
                 ctx.fillText(name, 540, 1350);
 
-                // Category
                 ctx.fillStyle = '#CBD5E1';
                 ctx.font = '600 38px Cairo, sans-serif';
                 ctx.fillText(`نوع الصورة: ${category}`, 540, 1430);
 
-                // Serial Number
                 ctx.fillStyle = '#F59E0B';
                 ctx.font = 'bold 45px Cairo, sans-serif';
                 ctx.fillText(`الرقم التسلسلي الخفي: ${serial}`, 540, 1510);
 
-                // Verified Badge Text
                 ctx.fillStyle = '#10B981';
                 ctx.font = 'bold 36px Cairo, sans-serif';
                 ctx.fillText('وثيقة تخرج معتمدة رسمياً ✅', 540, 1600);
 
-                // Footer Note
-                ctx.fillStyle = '#D4AF37';
+                ctx.fillStyle = primaryColor;
                 ctx.font = 'bold 36px Cairo, sans-serif';
                 ctx.fillText('تم توثيق الصورة وحفظ المكان في بوستر التخرج 🎓', 540, 1790);
 
-                // Export to Data URL
                 currentGeneratedStoryDataUrl = canvas.toDataURL('image/jpeg', 0.95);
 
-                // Display Modal Preview
                 document.getElementById('renderedStoryImage').src = currentGeneratedStoryDataUrl;
                 document.getElementById('storyPreviewModal').classList.remove('hidden');
 
@@ -1453,14 +1704,21 @@
                 } else if (found.status === 'REJECTED') {
                     statusBadge = `<span class="text-xs bg-red-500/20 text-red-400 font-bold px-3 py-1 rounded-full border border-red-500/30"><i class="fa-solid fa-circle-xmark ml-1"></i> الطلب مرفوض ❌</span>`;
                     statusMessage = `
-                        <div class="p-2.5 bg-red-500/10 border border-red-500/30 rounded-xl text-xs text-red-300 space-y-1">
+                        <div class="p-2.5 bg-red-500/10 border border-red-500/30 rounded-xl text-xs text-red-300 space-y-2">
                             <div><strong>سبب الرفض:</strong> ${found.rejectionReason || 'الصورة غير واضحة أو مخالفة للتعليمات'}.</div>
-                            <div class="text-[11px] text-slate-400">تواصل مع الدعم الفني لإلغاء القيد وإعادة رفع صورة جديدة.</div>
+                            <button onclick="openReuploadModal('${found.id}')" class="w-full py-2 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold rounded-xl text-xs transition shadow flex items-center justify-center gap-1.5">
+                                <i class="fa-solid fa-arrow-up-from-bracket"></i> اضغط هنا لاستبدال ورفع صورة جديدة
+                            </button>
                         </div>
                     `;
                 } else {
                     statusBadge = `<span class="text-xs bg-amber-500/20 text-amber-400 font-bold px-3 py-1 rounded-full border border-amber-500/30"><i class="fa-solid fa-hourglass-half ml-1"></i> قيد المراجعة والتدقيق ⏳</span>`;
-                    statusMessage = `<p class="text-xs text-amber-300 font-semibold">طلبك وصل بنجاح وجاري تدقيق الصورة من قبل مسؤول البوستر.</p>`;
+                    statusMessage = `
+                        <div class="flex justify-between items-center text-xs">
+                            <p class="text-amber-300 font-semibold">طلبك وصل بنجاح وجاري تدقيق الصورة من قبل مسؤول البوستر.</p>
+                            <button onclick="openReuploadModal('${found.id}')" class="text-[11px] underline text-amber-300 hover:text-white flex-shrink-0 mr-2">تغيير الصورة</button>
+                        </div>
+                    `;
                 }
 
                 resultArea.innerHTML = `
@@ -1566,6 +1824,27 @@
             }
         }
 
+        // Table Selection Toggle
+        function toggleSelectAllRows(masterCheckbox) {
+            const checkboxes = document.querySelectorAll('.student-row-checkbox');
+            checkboxes.forEach(cb => cb.checked = masterCheckbox.checked);
+        }
+
+        async function batchApproveSelected() {
+            const checkboxes = document.querySelectorAll('.student-row-checkbox:checked');
+            if (checkboxes.length === 0) {
+                showCustomModal('تنبيه', 'يرجى تحديد طلاب من الجدول أولاً للموافقة الجماعية.', 'warning');
+                return;
+            }
+            let count = 0;
+            for (let cb of checkboxes) {
+                const docId = cb.value;
+                await window.updateStudentStatusInCloud(docId, 'APPROVED');
+                count++;
+            }
+            showCustomModal('موافقة جماعية', `تمت الموافقة الجماعية واعتمدت صور (${count}) طلاب بنجاح!`, 'info');
+        }
+
         // Render Admin Main Table
         window.renderAdminTable = function() {
             const tbody = document.getElementById('studentsTableBody');
@@ -1616,6 +1895,7 @@
                 const displaySerial = (student.serial || '000000').toString().replace(/#/g, '');
 
                 tr.innerHTML = `
+                    <td class="p-3.5 text-center"><input type="checkbox" class="student-row-checkbox" value="${student.id}"></td>
                     <td class="p-3.5 font-bold text-slate-500">${index + 1}</td>
                     <td class="p-3.5">
                         <img src="${student.image}" alt="${student.name}" class="w-10 h-10 rounded-lg object-cover border border-amber-500/40 shadow">
@@ -1649,7 +1929,7 @@
             });
         };
 
-        // Render Poster Grid Mockup View
+        // Render Poster Grid Mockup & Analytics View
         window.renderPosterGridMockup = function() {
             const container = document.getElementById('posterGridContainer');
             const mockupBadge = document.getElementById('mockupCountBadge');
@@ -1657,6 +1937,15 @@
 
             const list = (window.cloudStudents || []).filter(s => s.status === 'APPROVED');
             mockupBadge.textContent = `${list.length} صورة معتمدة`;
+
+            // Analytics Breakdown
+            const childCount = list.filter(s => (s.type || '').includes('طفولة')).length;
+            const gradCount = list.filter(s => (s.type || '').includes('تخرج')).length;
+            const casualCount = list.filter(s => (s.type || '').includes('كاجوال')).length;
+
+            document.getElementById('analyticsChildCount').textContent = childCount;
+            document.getElementById('analyticsGradCount').textContent = gradCount;
+            document.getElementById('analyticsCasualCount').textContent = casualCount;
 
             if (list.length === 0) {
                 container.innerHTML = `
@@ -1808,13 +2097,13 @@
             ws['!views'] = [{ RTL: true }];
 
             ws['!cols'] = [
-                { wch: 8 },  // #
-                { wch: 35 }, // Name
-                { wch: 22 }, // Type
-                { wch: 22 }, // Serial
-                { wch: 24 }, // Status
-                { wch: 30 }, // Date
-                { wch: 35 }  // Note
+                { wch: 8 },
+                { wch: 35 },
+                { wch: 22 },
+                { wch: 22 },
+                { wch: 24 },
+                { wch: 30 },
+                { wch: 35 }
             ];
 
             ws['!merges'] = [
@@ -1822,7 +2111,6 @@
                 { s: { r: 1, c: 0 }, e: { r: 1, c: 6 } }
             ];
 
-            // Styles Definitions
             const titleStyle = {
                 font: { name: "Cairo", sz: 15, bold: true, color: { rgb: "FFFFFF" } },
                 fill: { fgColor: { rgb: "1E1B4B" } },
